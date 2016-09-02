@@ -8,12 +8,6 @@
 
 #define VERSION "1.0.0"
 #define BUFFER_LENGTH 1024
-#define PGM_WIDTH 640
-#define PGM_HEIGHT 480
-#define COMPLEX_RECT_SIDE 4
-#define RE_C 0.285
-#define IM_C -0.01
-
 
 void show_version() {
 	printf("v%s\n", VERSION);
@@ -40,14 +34,14 @@ int main (int argc, char *argv[]) {
 
 	bool help, version, resolution, new_center, new_C, width, height, output;
 	help = version = resolution = new_center = new_C = width = height = output = false;
-	long resolution_height = PGM_HEIGHT;
-	long resolution_width = PGM_WIDTH;
+	long resolution_height = DEFAULT_IMAGE_HEIGHT;
+	long resolution_width = DEFAULT_IMAGE_WIDTH;
 	_complex center;
-	complex_init(&center, 0, 0);
+	complex_init(&center, DEFAULT_RENDER_CENTER_X, DEFAULT_RENDER_CENTER_Y);
 	_complex C;
-	complex_init(&C, RE_C, IM_C);
-	float complex_plane_height = COMPLEX_RECT_SIDE;
-	float complex_plane_width = COMPLEX_RECT_SIDE;
+	complex_init(&C, DEFAULT_RATIO_X, DEFAULT_RATIO_Y);
+	float complex_plane_height = DEFAULT_RENDER_HEIGHT;
+	float complex_plane_width = DEFAULT_RENDER_WIDTH;
 	char* output_file = NULL;
 	
 	int flag = 0;

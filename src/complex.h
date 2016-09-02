@@ -7,12 +7,12 @@ typedef struct _complex {
 } _complex;
 
 int complex_init(_complex *self, float real, float imaginary);
-int complex_add(_complex *self, _complex *other);
+int complex_add(_complex *self, const _complex *other);
 //int complex_sub(_complex *self, _complex *other);
-int complex_mult(_complex *self, _complex *other);
+int complex_mult(_complex *self, const _complex *other);
 //int complex_div(_complex *self, _complex *other);
 int strtoc(_complex *self, char* str);
-unsigned int complex_abs(_complex *self);
+unsigned int complex_abs(const _complex *self);
 
 float complex_getX(_complex *self);
 float complex_getY(_complex *self);

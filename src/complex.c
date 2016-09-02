@@ -9,13 +9,13 @@ int complex_init(_complex *self, float real, float imaginary) {
     return 0;
 }
 
-int complex_add(_complex *self, _complex *other) {
+int complex_add(_complex *self, const _complex *other) {
     self->real += other->real;
     self->imaginary += other->imaginary;
     return 0; 
 }
 
-int complex_mult(_complex *self, _complex *other) {
+int complex_mult(_complex *self, const _complex *other) {
     self->real = self->real * other->real - 
         self->imaginary * other->imaginary;
     self->imaginary = self->real * other->imaginary + 
@@ -38,6 +38,6 @@ float complex_getY(_complex *self) {
 	return self->imaginary;
 }
 
-unsigned int complex_abs(_complex *self) {
+unsigned int complex_abs(const _complex *self) {
 	return sqrt(self->real * self->real + self->imaginary * self->imaginary);
 }

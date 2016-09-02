@@ -28,3 +28,11 @@ int strtoc(_complex *self, char* str) {
 	self->imaginary = strtof(end, NULL);
 	return 0;
 }
+
+float getX(_complex *self) {
+	return self->real;
+}
+
+float getY(_complex *self) {
+	return self->imaginary;
+}

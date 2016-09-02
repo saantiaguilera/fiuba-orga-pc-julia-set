@@ -31,3 +31,8 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Other
+.color_coded
+.ycm_extra_conf.*
+*.swp

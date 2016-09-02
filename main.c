@@ -51,8 +51,8 @@ int main (int argc, char *argv[]) {
 	float im_center = 0;
 	float re_C = RE_C;
 	float im_C = IM_C;
-	float complex_plane_height = 4;
-	float complex_plane_width = 4;
+	float complex_plane_height = COMPLEX_RECT_SIDE;
+	float complex_plane_width = COMPLEX_RECT_SIDE;
 	char* output_file = NULL;
 	
 	// getopt setup

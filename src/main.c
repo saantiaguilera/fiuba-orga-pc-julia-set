@@ -36,10 +36,6 @@ void load_new_resolution(long* resolution_height, long* resolution_width, char o
 	*resolution_height = strtol(&end[1], NULL, 10);
 }
 
-void load_new_C(float* re_C, float* im_C, char optarg[]) {
-
-}
-
 int main (int argc, char *argv[]) {
 
 	bool help, version, resolution, new_center, new_C, width, height, output;

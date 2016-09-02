@@ -36,6 +36,27 @@ void load_new_resolution(long* resolution_height, long* resolution_width, char o
 	*resolution_height = strtol(&end[1], NULL, 10);
 }
 
+int write_image(char output_file[], long resolution_height, 
+        long resolution_width, _complex *center, _complex *C, 
+        float complex_plane_height, float complex_plane_width) {
+    FILE *fp;
+    if (output_file != NULL) {
+        fp = fopen(output_file, "wb");
+        if (fp == NULL) {
+            fprintf(stderr, "Error al abrir archivo.\n");
+            return 1;
+        }
+    } else {
+        fp = stdout;
+    }
+    
+    fprintf(fp, "P5 \n");
+    fprintf(fp, "%ld %ld \n", resolution_width, resolution_height);
+    fprintf(fp, "15 \n");
+    
+    return 0;
+}
+
 int main (int argc, char *argv[]) {
 
 	bool help, version, resolution, new_center, new_C, width, height, output;
@@ -92,8 +113,9 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'o' :
 				output = true;
-				output_file = optarg; // Falta chequear si es "-" para que la salida sea stdout
-				break;
+                // Falta chequear si es "-" para que la salida sea stdout
+				output_file = optarg;
+                break;
 		}
 	}
 	

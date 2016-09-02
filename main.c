@@ -28,8 +28,10 @@ void show_help() {
 	fclose(fp);
 }
 
-void load_new_resolution(int* resolution_height, int* resolution_width, char optarg[]) {
-
+void load_new_resolution(long* resolution_height, long* resolution_width, char optarg[]) {
+	char* end;
+	*resolution_width = strtol(optarg, &end, 10);
+	*resolution_height = strtol(&end[1], NULL, 10);
 }
 
 void load_new_center(float* re_center, float* im_center, char optarg[]) {
@@ -45,8 +47,8 @@ int main (int argc, char *argv[]) {
 	// el horror
 	bool help, version, resolution, center, C, width, height, output;
 	help = version = resolution = center = C = width = height = output = false;
-	int resolution_height = PGM_HEIGHT;
-	int resolution_width = PGM_WIDTH;
+	long resolution_height = PGM_HEIGHT;
+	long resolution_width = PGM_WIDTH;
 	float re_center = 0;
 	float im_center = 0;
 	float re_C = RE_C;
@@ -108,7 +110,7 @@ int main (int argc, char *argv[]) {
 	else if (help)
 		show_help();
 	else
-		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, re_center, im_center, re_C, im_C, complex_plane_height, complex_plane_width, output_file);
+		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, re_center, im_center, re_C, im_C, complex_plane_height, complex_plane_width, output_file);
 		//julia_set(...);
 
 	return EXIT_SUCCESS;

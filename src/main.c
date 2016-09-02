@@ -5,6 +5,7 @@
 #include <getopt.h>
 
 #include "complex.h"
+#include "decoder.h"
 
 #define VERSION "1.0.0"
 #define BUFFER_LENGTH 1024

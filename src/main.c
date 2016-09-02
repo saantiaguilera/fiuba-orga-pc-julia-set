@@ -41,21 +41,19 @@ void load_new_C(float* re_C, float* im_C, char optarg[]) {
 }
 
 int main (int argc, char *argv[]) {
-	
-	// el horror
-	bool help, version, resolution, new_center, C, width, height, output;
-	help = version = resolution = new_center = C = width = height = output = false;
+
+	bool help, version, resolution, new_center, new_C, width, height, output;
+	help = version = resolution = new_center = new_C = width = height = output = false;
 	long resolution_height = PGM_HEIGHT;
 	long resolution_width = PGM_WIDTH;
 	_complex center;
 	complex_init(&center, 0, 0);
-	float re_C = RE_C;
-	float im_C = IM_C;
+	_complex C;
+	complex_init(&C, RE_C, IM_C);
 	float complex_plane_height = COMPLEX_RECT_SIDE;
 	float complex_plane_width = COMPLEX_RECT_SIDE;
 	char* output_file = NULL;
 	
-	// getopt setup
 	int flag = 0;
 	struct option opts[] = {
 		{"version", no_argument, 0, 'v'},
@@ -85,8 +83,8 @@ int main (int argc, char *argv[]) {
 				strtoc(&center, optarg);
 				break;
 			case 'C' :
-				C = true;
-				load_new_C(&re_C, &im_C, optarg);
+				new_C = true;
+				strtoc(&C, optarg);
 				break;
 			case 'w' :
 				width = true;
@@ -108,7 +106,7 @@ int main (int argc, char *argv[]) {
 	else if (help)
 		show_help();
 	else
-		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, center.real, center.imaginary, re_C, im_C, complex_plane_height, complex_plane_width, output_file);
+		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, center.real, center.imaginary, C.real, C.imaginary, complex_plane_height, complex_plane_width, output_file);
 		//julia_set(...);
 
 	return EXIT_SUCCESS;

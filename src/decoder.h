@@ -21,10 +21,10 @@ typedef struct _decoder {
 } _decoder;
 
 int decoder_init(_decoder *self,
-					int iw = PGM_WIDTH, int ih = PGM_HEIGHT,
-					float rw = CMPLEX_RECT_SIDE, float rh = COMPLEX_RECT_SIDE,
-					_complex *rc = 0);
-int decoder_decode(FILE *output);
-int decoder_close();
+					int imgWidth, int imgHeight,
+					float rndWidth, float rndHeight,
+					_complex *rndCenter);
+int decoder_decode(_decoder *self, FILE *output);
+int decoder_close(_decoder *self);
 
 #endif

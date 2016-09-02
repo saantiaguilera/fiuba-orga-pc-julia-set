@@ -49,12 +49,12 @@ int decoder_decode(_decoder *self, FILE *output) {
 			//Using as N = Black in that image format
 			int color;
 			for (color = WHITE ; 
-						color < BLACK || complex_abs(&point) > MAX_ABS_OFFSET ;
-								++color) {
+				color < BLACK || complex_abs(&point) > MAX_ABS_OFFSET ;
+					++color) {
 				float newX = (complex_getX(&point) * complex_getX(&point) 
-									+ complex_getX(self->ratio));
+						+ complex_getX(self->ratio));
 				float newY = (complex_getY(&point) * complex_getY(&point)
-									+ complex_getY(self->ratio));
+						+ complex_getY(self->ratio));
 
 				complex_init(&point, newX, newY);
 			}

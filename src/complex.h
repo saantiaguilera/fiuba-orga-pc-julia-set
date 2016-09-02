@@ -14,7 +14,7 @@ int complex_mult(_complex *self, const _complex *other);
 int strtoc(_complex *self, char* str);
 unsigned int complex_abs(const _complex *self);
 
-float complex_getX(_complex *self);
-float complex_getY(_complex *self);
+float complex_getX(const _complex *self);
+float complex_getY(const _complex *self);
 
 #endif

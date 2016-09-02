@@ -30,11 +30,11 @@ int strtoc(_complex *self, char* str) {
 	return 0;
 }
 
-float complex_getX(_complex *self) {
+float complex_getX(const _complex *self) {
 	return self->real;
 }
 
-float complex_getY(_complex *self) {
+float complex_getY(const _complex *self) {
 	return self->imaginary;
 }
 

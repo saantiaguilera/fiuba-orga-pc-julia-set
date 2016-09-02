@@ -37,11 +37,8 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-	float indexX = startX;
-	float indexY = startY;
-
-	for ( ; indexX < endX ; indexX += stepX) {
-		for ( ; indexY < endY ; indexY += stepY) {
+	for (float indexX = startX ; indexX < endX ; indexX += stepX) {
+		for (float indexY = startY ; indexY < endY ; indexY += stepY) {
 			//Here im at 1 px of the image.
 			_complex point;
 			complex_init(&point, indexX, indexY);

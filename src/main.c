@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "complex.h"
+
 #define VERSION "1.0.0"
 #define BUFFER_LENGTH 1024
 #define PGM_WIDTH 640
@@ -34,10 +36,6 @@ void load_new_resolution(long* resolution_height, long* resolution_width, char o
 	*resolution_height = strtol(&end[1], NULL, 10);
 }
 
-void load_new_center(float* re_center, float* im_center, char optarg[]) {
-
-}
-
 void load_new_C(float* re_C, float* im_C, char optarg[]) {
 
 }
@@ -45,12 +43,12 @@ void load_new_C(float* re_C, float* im_C, char optarg[]) {
 int main (int argc, char *argv[]) {
 	
 	// el horror
-	bool help, version, resolution, center, C, width, height, output;
-	help = version = resolution = center = C = width = height = output = false;
+	bool help, version, resolution, new_center, C, width, height, output;
+	help = version = resolution = new_center = C = width = height = output = false;
 	long resolution_height = PGM_HEIGHT;
 	long resolution_width = PGM_WIDTH;
-	float re_center = 0;
-	float im_center = 0;
+	_complex center;
+	complex_init(&center, 0, 0);
 	float re_C = RE_C;
 	float im_C = IM_C;
 	float complex_plane_height = COMPLEX_RECT_SIDE;
@@ -83,8 +81,8 @@ int main (int argc, char *argv[]) {
 				load_new_resolution(&resolution_height, &resolution_width, optarg);
 				break;
 			case 'c' :
-				center = true;
-				load_new_center(&re_center, &im_center, optarg);
+				new_center = true;
+				strtoc(&center, optarg);
 				break;
 			case 'C' :
 				C = true;
@@ -110,7 +108,7 @@ int main (int argc, char *argv[]) {
 	else if (help)
 		show_help();
 	else
-		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, re_center, im_center, re_C, im_C, complex_plane_height, complex_plane_width, output_file);
+		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, center.real, center.imaginary, re_C, im_C, complex_plane_height, complex_plane_width, output_file);
 		//julia_set(...);
 
 	return EXIT_SUCCESS;

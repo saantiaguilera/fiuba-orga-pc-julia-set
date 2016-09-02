@@ -11,4 +11,6 @@ int complex_add(_complex *self, _complex *other);
 //int complex_sub(_complex *self, _complex *other);
 int complex_mult(_complex *self, _complex *other);
 //int complex_div(_complex *self, _complex *other);
+int strtoc(_complex *self, char* str);
+
 #endif

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "complex.h"
 
 int complex_init(_complex *self, float real, float imaginary) {
@@ -18,4 +20,11 @@ int complex_mult(_complex *self, _complex *other) {
     self->imaginary = self->real * other->imaginary + 
         self->imaginary * other->real;
     return 0;
+}
+
+int strtoc(_complex *self, char* str) {
+	char* end;
+	self->real = strtof(str, &end);
+	self->imaginary = strtof(end, NULL);
+	return 0;
 }

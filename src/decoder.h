@@ -22,9 +22,9 @@ typedef struct _decoder {
 } _decoder;
 
 int decoder_init(_decoder *self,
-					int imgWidth, int imgHeight,
-					float rndWidth, float rndHeight,
-					_complex *rndCenter, _complex *ratio);
+		int imgWidth, int imgHeight,
+		float rndWidth, float rndHeight,
+		_complex *rndCenter, _complex *ratio);
 int decoder_decode(_decoder *self, FILE *output);
 
 #endif

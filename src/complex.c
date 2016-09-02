@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "complex.h"
+#include "math.h"
 
 int complex_init(_complex *self, float real, float imaginary) {
     self->real = real;
@@ -29,10 +30,14 @@ int strtoc(_complex *self, char* str) {
 	return 0;
 }
 
-float getX(_complex *self) {
+float complex_getX(_complex *self) {
 	return self->real;
 }
 
-float getY(_complex *self) {
+float complex_getY(_complex *self) {
 	return self->imaginary;
+}
+
+unsigned int complex_abs(_complex *self) {
+	return sqrt(self->real * self->real + self->imaginary * self->imaginary);
 }

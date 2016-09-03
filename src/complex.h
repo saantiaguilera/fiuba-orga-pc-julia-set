@@ -12,6 +12,9 @@ int complex_add(_complex *self, const _complex *other);
 int complex_mult(_complex *self, const _complex *other);
 //int complex_div(_complex *self, _complex *other);
 int strtoc(_complex *self, char* str);
-float complex_abs(const _complex *self);
+unsigned int complex_abs(const _complex *self);
+
+float complex_getX(const _complex *self);
+float complex_getY(const _complex *self);
 
 #endif

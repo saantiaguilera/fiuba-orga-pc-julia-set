@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "complex.h"
+#include "math.h"
 
 int complex_init(_complex *self, float real, float imaginary) {
     self->real = real;
@@ -8,13 +9,13 @@ int complex_init(_complex *self, float real, float imaginary) {
     return 0;
 }
 
-int complex_add(_complex *self, _complex *other) {
+int complex_add(_complex *self, const _complex *other) {
     self->real += other->real;
     self->imaginary += other->imaginary;
     return 0; 
 }
 
-int complex_mult(_complex *self, _complex *other) {
+int complex_mult(_complex *self, const _complex *other) {
     self->real = self->real * other->real - 
         self->imaginary * other->imaginary;
     self->imaginary = self->real * other->imaginary + 
@@ -27,4 +28,16 @@ int strtoc(_complex *self, char* str) {
 	self->real = strtof(str, &end);
 	self->imaginary = strtof(end, NULL);
 	return 0;
+}
+
+float complex_getX(const _complex *self) {
+	return self->real;
+}
+
+float complex_getY(const _complex *self) {
+	return self->imaginary;
+}
+
+unsigned int complex_abs(const _complex *self) {
+	return sqrt(self->real * self->real + self->imaginary * self->imaginary);
 }

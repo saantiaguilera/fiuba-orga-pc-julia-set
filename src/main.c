@@ -25,15 +25,19 @@ void show_help() {
 	fclose(fp);
 }
 
-void load_new_resolution(long* resolution_height, long* resolution_width, char optarg[]) {
+void load_new_resolution(int* resolution_height, int* resolution_width, char optarg[]) {
 	char* end;
 	*resolution_width = strtol(optarg, &end, 10);
 	*resolution_height = strtol(&end[1], NULL, 10);
 }
 
-int write_image(char output_file[], long resolution_height, 
-        long resolution_width, _complex *center, _complex *C, 
+int write_image(char output_file[], int resolution_height, 
+        int resolution_width, _complex *center, _complex *C, 
         float complex_plane_height, float complex_plane_width) {
+    int ret_value = 0;
+    _decoder decoder;
+    decoder_init(&decoder, resolution_width, resolution_height, 
+            complex_plane_width, complex_plane_height, center, C);
     FILE *fp;
     if (output_file != NULL) {
         fp = fopen(output_file, "wb");
@@ -44,20 +48,24 @@ int write_image(char output_file[], long resolution_height,
     } else {
         fp = stdout;
     }
+
+    if (decoder_decode(&decoder, fp) != 0) {
+        fprintf(stderr, "Error al generar imagen.\n");
+        ret_value = 1;
+    };
     
-    fprintf(fp, "P5 \n");
-    fprintf(fp, "%ld %ld \n", resolution_width, resolution_height);
-    fprintf(fp, "15 \n");
-    
-    return 0;
+    if (output_file != NULL) {
+        fclose(fp);
+    } 
+    return ret_value;
 }
 
 int main (int argc, char *argv[]) {
 
 	bool help, version, resolution, new_center, new_C, width, height, output;
 	help = version = resolution = new_center = new_C = width = height = output = false;
-	long resolution_height = DEFAULT_IMAGE_HEIGHT;
-	long resolution_width = DEFAULT_IMAGE_WIDTH;
+	int resolution_height = DEFAULT_IMAGE_HEIGHT;
+	int resolution_width = DEFAULT_IMAGE_WIDTH;
 	_complex center;
 	complex_init(&center, DEFAULT_RENDER_CENTER_X, DEFAULT_RENDER_CENTER_Y);
 	_complex C;
@@ -119,8 +127,15 @@ int main (int argc, char *argv[]) {
 	else if (help)
 		show_help();
 	else
-		printf("JULIA SET\n resolution_height = %lu\n resolution_width = %lu\n re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n complex_plane_height = %f\n complex_plane_width = %f\n output_file = %s\n", resolution_height, resolution_width, center.real, center.imaginary, C.real, C.imaginary, complex_plane_height, complex_plane_width, output_file);
+		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n"
+                "re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n"
+                "complex_plane_height = %f\n complex_plane_width = %f\n" 
+                "output_file = %s\n", resolution_height, resolution_width, 
+                center.real, center.imaginary, C.real, C.imaginary, 
+                complex_plane_height, complex_plane_width, output_file);
 		//julia_set(...);
+        write_image(output_file, resolution_height, resolution_width, &center,
+                &C, complex_plane_height, complex_plane_width);
 
 	return EXIT_SUCCESS;
 }

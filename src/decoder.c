@@ -4,7 +4,8 @@
 #define BLACK 255
 #define MAX_ABS_OFFSET 2
 
-int decoder_init(_decoder *self, int iw, int ih, float rw, float rh, _complex *c, _complex *r) {
+int decoder_init(_decoder *self, int iw, int ih, float rw, float rh, 
+        _complex *c, _complex *r) {
 	if (self == 0 || c == 0 || r == 0)  //Cant be nulls
 		return -1;
 
@@ -28,7 +29,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 
 	//Concurrency is for poor computers
 	float startX, startY, endX, endY, stepX, stepY;
-	
+	unsigned int row_count = 0;
 	startX = complex_getX(self->renderCenter) - (self->renderWidth / 2);
 	startY = complex_getY(self->renderCenter) - (self->renderHeight / 2);
 	endX = complex_getX(self->renderCenter) + (self->renderWidth / 2);
@@ -37,14 +38,18 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-	for (float indexX = startX ; indexX < endX ; indexX += stepX) {
-		for (float indexY = startY ; indexY < endY ; indexY += stepY) {
+    fprintf(output, "P5 \n");
+    fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
+    fprintf(output, "255\n");
+
+	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
+		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
 			//Here im at 1 px of the image.
 			_complex point;
 			complex_init(&point, indexX, indexY);
 
 			//Using as N = Black in that image format
-			int color;
+			int color = WHITE;
 			for (color = WHITE ; 
 				color < BLACK || complex_abs(&point) > MAX_ABS_OFFSET ;
 					++color) {
@@ -57,6 +62,11 @@ int decoder_decode(_decoder *self, FILE *output) {
 			}
 
 			//Here we should write the file with counter
+            fprintf(output, "%d ", color);
+            if (row_count == 69) {
+                fprintf(output, "\n");
+                row_count = 0;
+            }
 		}
 	}
 

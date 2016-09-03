@@ -38,9 +38,9 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-    fprintf(output, "P5 \n");
-    fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
-    fprintf(output, "255\n");
+	fprintf(output, "P5 \n");
+	fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
+	fprintf(output, "255\n");
 
 	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
 		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
@@ -62,11 +62,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 			}
 
 			//Here we should write the file with counter
-            fprintf(output, "%d ", color);
-            if (row_count == 69) {
-                fprintf(output, "\n");
-                row_count = 0;
-            }
+			fprintf(output, "%d ", color);		
 		}
 	}
 

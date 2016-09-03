@@ -25,11 +25,9 @@ int decoder_init(_decoder *self, int iw, int ih, float rw, float rh,
 //TODO use uints / check endianess ??
 
 int decoder_decode(_decoder *self, FILE *output) {
-	//Check file has w rights
-
 	//Concurrency is for poor computers
 	float startX, startY, endX, endY, stepX, stepY;
-	unsigned int row_count = 0;
+
 	startX = complex_getX(self->renderCenter) - (self->renderWidth / 2);
 	startY = complex_getY(self->renderCenter) - (self->renderHeight / 2);
 	endX = complex_getX(self->renderCenter) + (self->renderWidth / 2);
@@ -38,7 +36,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-	fprintf(output, "P5 \n");
+	fprintf(output, "P5\n");
 	fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
 	fprintf(output, "255\n");
 
@@ -64,6 +62,8 @@ int decoder_decode(_decoder *self, FILE *output) {
 			//Here we should write the file with counter
 			fprintf(output, "%d ", color);		
 		}
+
+		fprintf(output, "\n");
 	}
 
 	//Here we should close the file

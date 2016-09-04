@@ -48,16 +48,15 @@ int decoder_decode(_decoder *self, FILE *output) {
 			_complex point;
 			complex_init(&point, indexX, indexY);
 
-	//		printf("Analizing point: (%f, %f)", indexX, indexY);
-
 			//Using as N = Black in that image format
 			int color;
 			for (color = BLACK ; 
 				color < WHITE - 1 && complex_abs(&point) <= MAX_ABS_OFFSET ;
 					++color) {
-				float newX = (complex_getX(&point) * complex_getX(&point) 
+				float newX = (complex_getX(&point) * complex_getX(&point)
+						- complex_getY(&point) * complex_getY(&point)
 						+ complex_getX(self->ratio));
-				float newY = (complex_getY(&point) * complex_getY(&point)
+				float newY = (2 * complex_getX(&point) * complex_getY(&point)
 						+ complex_getY(self->ratio));
 				
 				complex_init(&point, newX, newY);

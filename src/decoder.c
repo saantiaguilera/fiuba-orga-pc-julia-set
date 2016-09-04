@@ -28,11 +28,13 @@ int decoder_decode(_decoder *self, FILE *output) {
 	//Concurrency is for poor computers
 	float startX, startY, endX, endY, stepX, stepY;
 
-	startX = complex_getX(self->renderCenter) - (self->renderWidth / 2);
-	startY = complex_getY(self->renderCenter) - (self->renderHeight / 2);
-	endX = complex_getX(self->renderCenter) + (self->renderWidth / 2);
-	endY = complex_getY(self->renderCenter) + (self->renderHeight / 2);
-	
+	float halfWidth = self->renderWidth / 2;
+	float halfHeight = self->renderHeight /2;
+	startX = complex_getX(self->renderCenter) - (halfWidth);
+	startY = complex_getY(self->renderCenter) + (halfHeight);
+	endX = complex_getX(self->renderCenter) + (halfWidth);
+	endY = complex_getY(self->renderCenter) - (halfHeight);
+		
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
@@ -40,13 +42,13 @@ int decoder_decode(_decoder *self, FILE *output) {
 	fprintf(output, "%d %d ", self->imageWidth, self->imageHeight);
 	fprintf(output, "%d\n", WHITE);
 
-//	char separator = ' ';
-
-	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
+	for (float indexY = startY ; indexY > endY ; indexY -= stepY) {
 		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
 			//Here im at 1 px of the image.
 			_complex point;
 			complex_init(&point, indexX, indexY);
+
+	//		printf("Analizing point: (%f, %f)", indexX, indexY);
 
 			//Using as N = Black in that image format
 			int color;

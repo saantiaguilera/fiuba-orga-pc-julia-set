@@ -11,6 +11,15 @@
 #define VERSION "1.0.0"
 #define BUFFER_LENGTH 1024
 
+#define ERROR_INVALID_RESOLUTION 2
+#define ERROR_INVALID_CENTER 3
+#define ERROR_INVALID_C 4
+#define ERROR_INVALID_WIDTH 5
+#define ERROR_INVALID_HEIGHT 6
+#define ERROR_NO_OUTPUT 7
+#define ERROR_ILLEGAL_OUTPUT 8
+#define ERROR_PROCESSING_SET 9
+
 void show_version() {
 	printf("v%s\n", VERSION);
 }
@@ -39,30 +48,25 @@ int write_image(char output_file[], int resolution_height,
 		int resolution_width, _complex *center, _complex *C, 
 		float complex_plane_height, float complex_plane_width) {
 
-	int ret_value = 0;
+	int ret_value = EXIT_SUCCESS;
 	_decoder decoder;
 	decoder_init(&decoder, resolution_width, resolution_height, 
 			complex_plane_width, complex_plane_height, center, C);
 	FILE *fp;
 	
-	if (output_file == NULL) {
-		fprintf(stderr, "fatal: output file is not specified.\n");
-		return 1;
-	
-	} else if (strcmp("-", output_file) == 0) {
+	if (strcmp("-", output_file) == 0) {
 		fp = stdout;
-
 	} else {
 		fp = fopen(output_file, "wb");
 		if (fp == NULL) {
 			fprintf(stderr, "fatal: cannot open output file.\n");
-			return 2;
+			return ERROR_ILLEGAL_OUTPUT;
 		}
 	}
 
 	if (decoder_decode(&decoder, fp) != 0) {
 		fprintf(stderr, "fatal: could not generate julia set.\n");
-		ret_value = 3;
+		ret_value = ERROR_PROCESSING_SET;
 	}
     
 	if (strcmp("-", output_file) != 0) fclose(fp);
@@ -108,20 +112,20 @@ int main (int argc, char *argv[]) {
 				resolution = true;
 				if (load_new_resolution(&resolution_height, &resolution_width, optarg) != 0)
 					fprintf(stderr, "fatal: invalid resolution specification.\n");
-					return EXIT_FAILURE;
+					return ERROR_INVALID_RESOLUTION;
 				break;
 			case 'c' :
 				new_center = true;
 				if (strtoc(&center, optarg) != 0) {
 					fprintf(stderr, "fatal: invalid center specification.\n");
-					return EXIT_FAILURE;
+					return ERROR_INVALID_CENTER;
 				}	
 				break;
 			case 'C' :
 				new_C = true;
 				if (strtoc(&C, optarg) != 0) {
 					fprintf(stderr, "fatal: invalid C specification.\n");
-					return EXIT_FAILURE;
+					return ERROR_INVALID_C;
 				}	
 				break;
 			case 'w' :
@@ -129,7 +133,7 @@ int main (int argc, char *argv[]) {
 				complex_plane_width = atof(optarg);
 				if (complex_plane_width == 0) {
 					fprintf(stderr, "fatal: invalid complex plane width specification.\n");
-					return EXIT_FAILURE;
+					return ERROR_INVALID_WIDTH;
 				}
 				break;
 			case 'H' :
@@ -137,7 +141,7 @@ int main (int argc, char *argv[]) {
 				complex_plane_height = atof(optarg);
 				if (complex_plane_height == 0) {
 					fprintf(stderr, "fatal: invalid complex plane height specification.\n");
-					return EXIT_FAILURE;
+					return ERROR_INVALID_HEIGHT;
 				}
 				break;
 			case 'o' :
@@ -152,7 +156,7 @@ int main (int argc, char *argv[]) {
 	else {
 		if (!output) {
 			fprintf(stderr, "fatal: No output specified.\n");
-			return EXIT_FAILURE;
+			return ERROR_NO_OUTPUT;
 		}
 		
 		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n"
@@ -162,7 +166,7 @@ int main (int argc, char *argv[]) {
                 center.real, center.img, C.real, C.img, 
                 complex_plane_height, complex_plane_width, output_file);
 
-		write_image(output_file, resolution_height, resolution_width, &center,
+		return write_image(output_file, resolution_height, resolution_width, &center,
                 &C, complex_plane_height, complex_plane_width);
 	}
 

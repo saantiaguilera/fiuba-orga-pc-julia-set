@@ -26,10 +26,15 @@ void show_help() {
 	fclose(fp);
 }
 
-void load_new_resolution(int* resolution_height, int* resolution_width, char optarg[]) {
+int load_new_resolution(int* resolution_height, int* resolution_width, char optarg[]) {
 	char* end;
 	*resolution_width = strtol(optarg, &end, 10);
 	*resolution_height = strtol(&end[1], NULL, 10);
+	if (!(*resolution_width) || !(*resolution_height)) {
+		fprintf(stderr, "fatal: resolution width and height must be non zero values.\n");
+		return 1;
+	}
+	return 0;
 }
 
 int write_image(char output_file[], int resolution_height, 
@@ -43,7 +48,7 @@ int write_image(char output_file[], int resolution_height,
 	FILE *fp;
 	
 	if (output_file == NULL) {
-		fprintf(stderr, "Error: Archivo de salida no especificado.\n");
+		fprintf(stderr, "fatal: output file is not specified.\n");
 		return 1;
 	
 	} else if (strcmp("-", output_file) == 0) {
@@ -52,13 +57,13 @@ int write_image(char output_file[], int resolution_height,
 	} else {
 		fp = fopen(output_file, "wb");
 		if (fp == NULL) {
-			fprintf(stderr, "Error: No se pudo abrir el archivo de salida.\n");
+			fprintf(stderr, "fatal: cannot open output file.\n");
 			return 2;
 		}
 	}
 
 	if (decoder_decode(&decoder, fp) != 0) {
-		fprintf(stderr, "Error: No se pudo generar la imagen.\n");
+		fprintf(stderr, "fatal: could not generate julia set.\n");
 		ret_value = 3;
 	}
     
@@ -83,7 +88,7 @@ int main (int argc, char *argv[]) {
 	
 	int flag = 0;
 	struct option opts[] = {
-		{"version", no_argument, 0, 'v'},
+		{"version", no_argument, 0, 'V'},
 		{"help", no_argument, 0, 'h'},
 		{"resolution", required_argument, 0, 'r'},
 		{"center", required_argument, 0, 'c'},
@@ -93,9 +98,9 @@ int main (int argc, char *argv[]) {
 		{"output", required_argument, 0, 'o'}
 	};
 
-	while ((flag = getopt_long(argc, argv, "vhr:c:C:w:H:o:", opts, NULL)) != -1) {
+	while ((flag = getopt_long(argc, argv, "Vhr:c:C:w:H:o:", opts, NULL)) != -1) {
 		switch (flag) {
-			case 'v' :
+			case 'V' :
 				version = true;
 				break;
 			case 'h' :
@@ -103,7 +108,8 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'r' :
 				resolution = true;
-				load_new_resolution(&resolution_height, &resolution_width, optarg);
+				if (load_new_resolution(&resolution_height, &resolution_width, optarg) != 0)
+					return EXIT_FAILURE;
 				break;
 			case 'c' :
 				new_center = true;

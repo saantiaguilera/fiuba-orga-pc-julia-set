@@ -1,7 +1,7 @@
 #include "decoder.h"
 
-#define WHITE 0
-#define BLACK 255
+#define WHITE 255
+#define BLACK 0
 #define MAX_ABS_OFFSET 2
 
 int decoder_init(_decoder *self, int iw, int ih, float rw, float rh, 
@@ -36,11 +36,11 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-	fprintf(output, "P5\n");
-	fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
-	fprintf(output, "255\n");
+	fprintf(output, "P5 ");
+	fprintf(output, "%d %d ", self->imageWidth, self->imageHeight);
+	fprintf(output, "%d\n", WHITE);
 
-	char separator = ' ';
+//	char separator = ' ';
 
 	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
 		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
@@ -49,9 +49,9 @@ int decoder_decode(_decoder *self, FILE *output) {
 			complex_init(&point, indexX, indexY);
 
 			//Using as N = Black in that image format
-			int color = WHITE;
-			for (color = WHITE ; 
-				color < BLACK && complex_abs(&point) <= MAX_ABS_OFFSET ;
+			int color;
+			for (color = BLACK ; 
+				color < WHITE - 1 && complex_abs(&point) <= MAX_ABS_OFFSET ;
 					++color) {
 				float newX = (complex_getX(&point) * complex_getX(&point) 
 						+ complex_getX(self->ratio));
@@ -61,11 +61,8 @@ int decoder_decode(_decoder *self, FILE *output) {
 				complex_init(&point, newX, newY);
 			}
 
-			fwrite((const void *) &color, sizeof(color), 1, output);
+			fwrite((const void *) &color, 1, 1, output);
 		}
-
-		fwrite(&separator, sizeof(separator), 1, output);
-
 	}
 
 	return 0;

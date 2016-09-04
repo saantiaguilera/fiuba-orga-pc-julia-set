@@ -126,16 +126,17 @@ int main (int argc, char *argv[]) {
 		show_version();
 	else if (help)
 		show_help();
-	else
+	else {
 		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n"
                 "re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n"
                 "complex_plane_height = %f\n complex_plane_width = %f\n" 
                 "output_file = %s\n", resolution_height, resolution_width, 
-                center.real, center.imaginary, C.real, C.imaginary, 
+                center.real, center.img, C.real, C.img, 
                 complex_plane_height, complex_plane_width, output_file);
-		//julia_set(...);
-        write_image(output_file, resolution_height, resolution_width, &center,
+
+		write_image(output_file, resolution_height, resolution_width, &center,
                 &C, complex_plane_height, complex_plane_width);
+	}
 
 	return EXIT_SUCCESS;
 }

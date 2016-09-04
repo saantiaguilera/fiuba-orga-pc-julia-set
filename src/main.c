@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -34,27 +35,34 @@ void load_new_resolution(int* resolution_height, int* resolution_width, char opt
 int write_image(char output_file[], int resolution_height, 
         int resolution_width, _complex *center, _complex *C, 
         float complex_plane_height, float complex_plane_width) {
+    
     int ret_value = 0;
     _decoder decoder;
     decoder_init(&decoder, resolution_width, resolution_height, 
             complex_plane_width, complex_plane_height, center, C);
-    FILE *fp;
-    if (output_file != NULL) {
+    FILE *fp; 
+    
+    if (output_file == NULL) {
+		fprintf(stderr, "Error: Archivo de salida no especificado.\n");
+		return 1;
+	
+	} else if (strcmp("-", output_file) == 0) {
+		fp = stdout;
+    
+    } else {
         fp = fopen(output_file, "wb");
         if (fp == NULL) {
-            fprintf(stderr, "Error al abrir archivo.\n");
-            return 1;
+            fprintf(stderr, "Error: No se pudo abrir el archivo de salida.\n");
+            return 2;
         }
-    } else {
-        fp = stdout;
     }
 
     if (decoder_decode(&decoder, fp) != 0) {
-        fprintf(stderr, "Error al generar imagen.\n");
+        fprintf(stderr, "Error: No se pudo generar la imagen.\n");
         ret_value = 1;
     };
     
-    if (output_file != NULL) {
+    if (strcmp("-", output_file) != 0) {
         fclose(fp);
     } 
     return ret_value;
@@ -116,21 +124,18 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'o' :
 				output = true;
-                // Falta chequear si es "-" para que la salida sea stdout
 				output_file = optarg;
                 break;
 		}
 	}
 	
-	if (version)
-		show_version();
-	else if (help)
-		show_help();
+	if (version) show_version();
+	else if (help) show_help();
 	else {
 		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n"
-                "re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n"
-                "complex_plane_height = %f\n complex_plane_width = %f\n" 
-                "output_file = %s\n", resolution_height, resolution_width, 
+                " re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n"
+                " complex_plane_height = %f\n complex_plane_width = %f\n" 
+                " output_file = %s\n", resolution_height, resolution_width, 
                 center.real, center.img, C.real, C.img, 
                 complex_plane_height, complex_plane_width, output_file);
 

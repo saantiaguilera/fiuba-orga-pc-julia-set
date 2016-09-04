@@ -150,6 +150,11 @@ int main (int argc, char *argv[]) {
 	if (version) show_version();
 	else if (help) show_help();
 	else {
+		if (!output) {
+			fprintf(stderr, "fatal: No output specified.\n");
+			return EXIT_FAILURE;
+		}
+		
 		printf("JULIA SET\n resolution_height = %d\n resolution_width = %d\n"
                 " re_center = %f\n im_center = %f\n re_C = %f\n im_C = %f\n"
                 " complex_plane_height = %f\n complex_plane_width = %f\n" 

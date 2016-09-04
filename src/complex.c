@@ -27,7 +27,8 @@ int complex_mult(_complex *self, const _complex *other) {
 int strtoc(_complex *self, char* str) {
 	char* end;
 	self->real = strtof(str, &end);
-	self->img = strtof(end, NULL);
+	self->img = strtof(end, &end);
+	if (*end != 'i') return 1;
 	return 0;
 }
 

@@ -33,39 +33,38 @@ void load_new_resolution(int* resolution_height, int* resolution_width, char opt
 }
 
 int write_image(char output_file[], int resolution_height, 
-        int resolution_width, _complex *center, _complex *C, 
-        float complex_plane_height, float complex_plane_width) {
-    
-    int ret_value = 0;
-    _decoder decoder;
-    decoder_init(&decoder, resolution_width, resolution_height, 
-            complex_plane_width, complex_plane_height, center, C);
-    FILE *fp; 
-    
-    if (output_file == NULL) {
+		int resolution_width, _complex *center, _complex *C, 
+		float complex_plane_height, float complex_plane_width) {
+
+	int ret_value = 0;
+	_decoder decoder;
+	decoder_init(&decoder, resolution_width, resolution_height, 
+			complex_plane_width, complex_plane_height, center, C);
+	FILE *fp;
+	
+	if (output_file == NULL) {
 		fprintf(stderr, "Error: Archivo de salida no especificado.\n");
 		return 1;
 	
 	} else if (strcmp("-", output_file) == 0) {
 		fp = stdout;
-    
-    } else {
-        fp = fopen(output_file, "wb");
-        if (fp == NULL) {
-            fprintf(stderr, "Error: No se pudo abrir el archivo de salida.\n");
-            return 2;
-        }
-    }
 
-    if (decoder_decode(&decoder, fp) != 0) {
-        fprintf(stderr, "Error: No se pudo generar la imagen.\n");
-        ret_value = 1;
-    };
+	} else {
+		fp = fopen(output_file, "wb");
+		if (fp == NULL) {
+			fprintf(stderr, "Error: No se pudo abrir el archivo de salida.\n");
+			return 2;
+		}
+	}
+
+	if (decoder_decode(&decoder, fp) != 0) {
+		fprintf(stderr, "Error: No se pudo generar la imagen.\n");
+		ret_value = 3;
+	}
     
-    if (strcmp("-", output_file) != 0) {
-        fclose(fp);
-    } 
-    return ret_value;
+	if (strcmp("-", output_file) != 0) fclose(fp);
+
+	return ret_value;
 }
 
 int main (int argc, char *argv[]) {

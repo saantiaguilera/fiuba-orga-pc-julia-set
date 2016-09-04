@@ -40,6 +40,8 @@ int decoder_decode(_decoder *self, FILE *output) {
 	fprintf(output, "%d %d\n", self->imageWidth, self->imageHeight);
 	fprintf(output, "255\n");
 
+	char separator = ' ';
+
 	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
 		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
 			//Here im at 1 px of the image.
@@ -49,23 +51,22 @@ int decoder_decode(_decoder *self, FILE *output) {
 			//Using as N = Black in that image format
 			int color = WHITE;
 			for (color = WHITE ; 
-				color < BLACK || complex_abs(&point) > MAX_ABS_OFFSET ;
+				color < BLACK && complex_abs(&point) <= MAX_ABS_OFFSET ;
 					++color) {
 				float newX = (complex_getX(&point) * complex_getX(&point) 
 						+ complex_getX(self->ratio));
 				float newY = (complex_getY(&point) * complex_getY(&point)
 						+ complex_getY(self->ratio));
-
+				
 				complex_init(&point, newX, newY);
 			}
 
-			//Here we should write the file with counter
-			fprintf(output, "%d ", color);		
+			fwrite((const void *) &color, sizeof(color), 1, output);
 		}
 
-		fprintf(output, "\n");
+		fwrite(&separator, sizeof(separator), 1, output);
+
 	}
 
-	//Here we should close the file
 	return 0;
 }

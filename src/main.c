@@ -30,10 +30,8 @@ int load_new_resolution(int* resolution_height, int* resolution_width, char opta
 	char* end;
 	*resolution_width = strtol(optarg, &end, 10);
 	*resolution_height = strtol(&end[1], NULL, 10);
-	if (!(*resolution_width) || !(*resolution_height)) {
-		fprintf(stderr, "fatal: resolution width and height must be non zero values.\n");
+	if (!(*resolution_width) || !(*resolution_height))
 		return 1;
-	}
 	return 0;
 }
 
@@ -109,23 +107,38 @@ int main (int argc, char *argv[]) {
 			case 'r' :
 				resolution = true;
 				if (load_new_resolution(&resolution_height, &resolution_width, optarg) != 0)
+					fprintf(stderr, "fatal: invalid resolution specification.\n");
 					return EXIT_FAILURE;
 				break;
 			case 'c' :
 				new_center = true;
-				strtoc(&center, optarg);
+				if (strtoc(&center, optarg) != 0) {
+					fprintf(stderr, "fatal: invalid center specification.\n");
+					return EXIT_FAILURE;
+				}	
 				break;
 			case 'C' :
 				new_C = true;
-				strtoc(&C, optarg);
+				if (strtoc(&C, optarg) != 0) {
+					fprintf(stderr, "fatal: invalid C specification.\n");
+					return EXIT_FAILURE;
+				}	
 				break;
 			case 'w' :
 				width = true;
 				complex_plane_width = atof(optarg);
+				if (complex_plane_width == 0) {
+					fprintf(stderr, "fatal: invalid complex plane width specification.\n");
+					return EXIT_FAILURE;
+				}
 				break;
 			case 'H' :
 				height = true;
 				complex_plane_height = atof(optarg);
+				if (complex_plane_height == 0) {
+					fprintf(stderr, "fatal: invalid complex plane height specification.\n");
+					return EXIT_FAILURE;
+				}
 				break;
 			case 'o' :
 				output = true;

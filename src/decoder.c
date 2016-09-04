@@ -60,6 +60,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 				complex_init(&point, newX, newY);
 			}
 
+			//Since our color ranges from 0..255, it can be stored in 1 byte (char) according to POSIX
 			fwrite((const void *) &color, 1, 1, output);
 		}
 	}

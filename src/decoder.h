@@ -11,8 +11,19 @@
 #define DEFAULT_RENDER_CENTER_X 0.0
 #define DEFAULT_RENDER_CENTER_Y 0.0
 
+/*
+Be careful the fractal in the pdf is not generated with the constant given.
+This are the constants for generating the pdf fractal. Below are the
+pdf constants for easy access if you want to change them
+*/
+#define DEFAULT_RATIO_X 0.285
+#define DEFAULT_RATIO_Y 0.01
+
+/*
+PDF Constants
 #define DEFAULT_RATIO_X 0.285
 #define DEFAULT_RATIO_Y -0.01
+*/
 
 typedef struct _decoder {
 	int imageWidth, imageHeight;

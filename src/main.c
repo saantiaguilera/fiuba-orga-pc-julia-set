@@ -110,9 +110,10 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'r' :
 				resolution = true;
-				if (load_new_resolution(&resolution_height, &resolution_width, optarg) != 0)
+				if (load_new_resolution(&resolution_height, &resolution_width, optarg) != 0) {
 					fprintf(stderr, "fatal: invalid resolution specification.\n");
 					return ERROR_INVALID_RESOLUTION;
+				}
 				break;
 			case 'c' :
 				new_center = true;

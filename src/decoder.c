@@ -29,9 +29,9 @@ int decoder_decode(_decoder *self, FILE *output) {
 	float halfWidth = self->renderWidth / 2;
 	float halfHeight = self->renderHeight /2;
 	startX = complex_getX(self->renderCenter) - (halfWidth);
-	startY = complex_getY(self->renderCenter) + (halfHeight);
+	startY = complex_getY(self->renderCenter) - (halfHeight);
 	endX = complex_getX(self->renderCenter) + (halfWidth);
-	endY = complex_getY(self->renderCenter) - (halfHeight);
+	endY = complex_getY(self->renderCenter) + (halfHeight);
 		
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
@@ -40,7 +40,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 	fprintf(output, "%d %d ", self->imageWidth, self->imageHeight);
 	fprintf(output, "%d\n", WHITE);
 
-	for (float indexY = startY ; indexY > endY ; indexY -= stepY) {
+	for (float indexY = startY ; indexY < endY ; indexY += stepY) {
 		for (float indexX = startX ; indexX < endX ; indexX += stepX) {
 			//Here im at 1 px of the image.
 			_complex point;

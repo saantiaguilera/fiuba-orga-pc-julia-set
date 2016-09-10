@@ -4,7 +4,7 @@
 #include "complex.h"
 #include "math.h"
 
-int complex_init(_complex *self, float real, float img) {
+int complex_init(_complex *self, double real, double img) {
     self->real = real;
     self->img = img;
     return 0;
@@ -32,17 +32,17 @@ int strtoc(_complex *self, char* str) {
 	return 0;
 }
 
-float complex_getX(const _complex *self) {
+double complex_getX(const _complex *self) {
 	return self->real;
 }
 
-float complex_getY(const _complex *self) {
+double complex_getY(const _complex *self) {
 	return self->img;
 }
 
-float complex_abs(const _complex *self) {
-	float real = self->real * self->real;
-	float img = self->img * self->img;
+double complex_abs(const _complex *self) {
+	double real = self->real * self->real;
+	double img = self->img * self->img;
 
 	return sqrt(real + img);
 }

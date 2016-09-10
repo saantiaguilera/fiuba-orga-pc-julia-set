@@ -46,7 +46,7 @@ int load_new_resolution(int* resolution_height, int* resolution_width, char opta
 
 int write_image(char output_file[], int resolution_height, 
 		int resolution_width, _complex *center, _complex *C, 
-		float complex_plane_height, float complex_plane_width) {
+		double complex_plane_height, double complex_plane_width) {
 
 	int ret_value = EXIT_SUCCESS;
 	_decoder decoder;
@@ -84,8 +84,8 @@ int main (int argc, char *argv[]) {
 	complex_init(&center, DEFAULT_RENDER_CENTER_X, DEFAULT_RENDER_CENTER_Y);
 	_complex C;
 	complex_init(&C, DEFAULT_RATIO_X, DEFAULT_RATIO_Y);
-	float complex_plane_height = DEFAULT_RENDER_HEIGHT;
-	float complex_plane_width = DEFAULT_RENDER_WIDTH;
+	double complex_plane_height = DEFAULT_RENDER_HEIGHT;
+	double complex_plane_width = DEFAULT_RENDER_WIDTH;
 	char* output_file = NULL;
 	
 	int flag = 0;

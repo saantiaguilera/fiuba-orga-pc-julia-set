@@ -5,7 +5,7 @@
 dibujada, expresado en forma binómica (i.e. a + bi). Por defecto usaremos 0 + 0i.
 
 -C: Determina el parámetro c, también expresado en forma binómica. El valor por defecto
-será 0,285 − 0,01i.
+será 0,285 + 0,01i.
 
 -w: Especifica el ancho del rectángulo que contiene la región del plano complejo que estamos
 por dibujar. Valor por defecto: 4.
@@ -15,6 +15,10 @@ defecto: 4.
 
 -o: Permite colocar la imagen de salida, (en formato PGM) en el archivo pasado como
 argumento; o por salida estándar (stdout) si el argumento es “-”.
+
+-h: Help. Brinda esta interfaz de ayuda por salida estandar.
+
+-v: Version. Brinda informacion acerca de la version del producto.
 
 Ejemplo de uso:
 ./julia-set -w 6 -H 5 -o juli.pgm -r 720x1200 -c +0.12-0.08i -C +0.20-0.09i

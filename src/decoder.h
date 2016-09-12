@@ -27,14 +27,14 @@ PDF Constants
 
 typedef struct _decoder {
 	int imageWidth, imageHeight;
-	float renderWidth, renderHeight;
+	double renderWidth, renderHeight;
 	_complex *renderCenter;
 	_complex *ratio;
 } _decoder;
 
 int decoder_init(_decoder *self,
 		int imgWidth, int imgHeight,
-		float rndWidth, float rndHeight,
+		double rndWidth, double rndHeight,
 		_complex *rndCenter, _complex *ratio);
 int decoder_decode(_decoder *self, FILE *output);
 

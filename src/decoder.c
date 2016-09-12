@@ -22,7 +22,6 @@ int decoder_init(_decoder *self, int iw, int ih, float rw, float rh,
 	return 0;
 }
 
-//TODO use uints / check endianess ??
 
 int decoder_decode(_decoder *self, FILE *output) {
 	//Concurrency is for poor computers

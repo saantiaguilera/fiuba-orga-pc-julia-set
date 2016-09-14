@@ -1,3 +1,4 @@
+
 #include "decoder.h"
 
 #define WHITE 255

@@ -8,9 +8,7 @@ typedef struct _complex {
 
 int complex_init(_complex *self, double real, double img);
 int complex_add(_complex *self, const _complex *other);
-//int complex_sub(_complex *self, _complex *other);
 int complex_mult(_complex *self, const _complex *other);
-//int complex_div(_complex *self, _complex *other);
 int strtoc(_complex *self, char* str);
 double complex_abs(const _complex *self);
 

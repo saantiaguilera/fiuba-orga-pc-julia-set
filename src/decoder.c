@@ -37,7 +37,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 	stepX = self->renderWidth / self->imageWidth;
 	stepY = self->renderHeight / self->imageHeight;
 
-	fprintf(output, "P5 ");
+	fprintf(output, "P2 ");
 	fprintf(output, "%d %d ", self->imageWidth, self->imageHeight);
 	fprintf(output, "%d\n", WHITE);
 

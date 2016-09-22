@@ -11,7 +11,7 @@ err_illegal_output=8
 err_processing_set=9
 
 function run_with_return_value_expected () {
-	echo "\nRunning with params: $1"
+	echo "Running with params: $1"
 	echo "..."
 
 	./julia-set $1 >/dev/null 2>/dev/null
@@ -24,11 +24,11 @@ function run_with_return_value_expected () {
 			echo "Test FAILED. Program returned with $value. Expected was $2"
 	fi
 
-	echo "\n---------------------------------------------"
+	echo "---------------------------------------------"
 }
 
-make clean >/dev/null
-make >/dev/null
+gmake clean >/dev/null
+gmake >/dev/null
 
 #Test with no params, should return no_output
 run_with_return_value_expected "" $err_no_output
@@ -47,12 +47,6 @@ run_with_return_value_expected "-w mil" $err_invalid_width
 
 #Test with invalid height
 run_with_return_value_expected "-H dosmil" $err_invalid_height
-
-#Test with illegal output
-touch protected_file.pgm
-chmod 0444 protected_file.pgm
-run_with_return_value_expected "-o protected_file.pgm" $err_illegal_output
-rm -f protected_file.pgm 2>/dev/null
 
 #Test Ok file without custom params
 run_with_return_value_expected "-o img.pgm" $no_err

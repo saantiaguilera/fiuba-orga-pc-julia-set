@@ -18,7 +18,6 @@
 #define ERROR_INVALID_HEIGHT 6
 #define ERROR_NO_OUTPUT 7
 #define ERROR_ILLEGAL_OUTPUT 8
-#define ERROR_PROCESSING_SET 9
 
 void show_version() {
 	printf("v%s\n", VERSION);

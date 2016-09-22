@@ -1,4 +1,3 @@
-
 #include "decoder.h"
 
 #define WHITE 255
@@ -68,7 +67,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 
 			if (lengthPrinted > 0)
 				lengthCounter += lengthPrinted;
-			else return 1;
+			else return ERROR_PROCESSING_SET;
 
 			if (lengthCounter > MAX_LENGTH_SIZE) {
 				fprintf(output, "\n");

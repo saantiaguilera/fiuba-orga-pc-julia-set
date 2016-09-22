@@ -11,6 +11,8 @@
 #define DEFAULT_RENDER_CENTER_X 0.0
 #define DEFAULT_RENDER_CENTER_Y 0.0
 
+#define ERROR_PROCESSING_SET 9
+
 /*
 Be careful the fractal in the pdf is not generated with the constant given.
 This are the constants for generating the pdf fractal. Below are the

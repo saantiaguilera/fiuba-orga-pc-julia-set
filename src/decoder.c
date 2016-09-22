@@ -5,6 +5,8 @@
 #define BLACK 0
 #define MAX_ABS_OFFSET 2
 
+#define MAX_LENGTH_SIZE 66
+
 int decoder_init(_decoder *self, int iw, int ih, double rw, double rh, 
         _complex *c, _complex *r) {
 	if (self == 0 || c == 0 || r == 0)  //Cant be nulls
@@ -41,6 +43,7 @@ int decoder_decode(_decoder *self, FILE *output) {
 	fprintf(output, "%d %d ", self->imageWidth, self->imageHeight);
 	fprintf(output, "%d\n", WHITE);
 
+	int lengthCounter = 0;
 	for (double indexY = startY ; indexY < endY ; indexY += stepY) {
 		for (double indexX = startX ; indexX < endX ; indexX += stepX) {
 			//Here im at 1 px of the image.
@@ -61,8 +64,16 @@ int decoder_decode(_decoder *self, FILE *output) {
 				complex_init(&point, newX, newY);
 			}
 
-			//Since our color ranges from 0..255, it can be stored in 1 byte (char) according to POSIX
-			fwrite((const void *) &color, 1, 1, output);
+			int lengthPrinted = fprintf(output, "%d ", color);
+
+			if (lengthPrinted > 0)
+				lengthCounter += lengthPrinted;
+			else return 1;
+
+			if (lengthCounter > MAX_LENGTH_SIZE) {
+				fprintf(output, "\n");
+				lengthCounter = 0;
+			}
 		}
 	}
 

@@ -25,7 +25,6 @@ int decoder_init(_decoder *self, int iw, int ih, double rw, double rh,
 }
 
 int decoder_decode(_decoder *self, FILE *output) {
-	//Concurrency is for poor computers
 	double startX, startY, endX, endY, stepX, stepY;
 
 	double halfWidth = self->renderWidth / 2;

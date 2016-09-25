@@ -1,5 +1,3 @@
-#!/bin/bash
-
 no_err=0
 err_invalid_resolution=2
 err_invalid_center=3
@@ -14,7 +12,7 @@ function run_with_return_value_expected () {
 	echo "Running with params: $1"
 	echo "..."
 
-	./julia-set $1 >/dev/null 2>/dev/null
+	./tp0 $1 >/dev/null 2>/dev/null
 	value=$?
 
 	if [ $value -eq $2 ]

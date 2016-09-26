@@ -8,7 +8,7 @@ $LC0:
 	.ascii	"v%s\n\000"
 	.align	2
 $LC1:
-	.ascii	"1.0.0\000"
+	.ascii	"2.0.0\000"
 	.text
 	.align	2
 	.globl	show_version
@@ -655,10 +655,11 @@ $L57:
 	s.d	$f0,56($sp)
 	lw	$2,144($fp)
 	sw	$2,64($sp)
-	la	$4,$LC27
-	lw	$5,88($fp)
-	lw	$6,92($fp)
-	la	$25,printf
+	la	$4,__sF+176
+	la	$5,$LC27
+	lw	$6,88($fp)
+	lw	$7,92($fp)
+	la	$25,fprintf
 	jal	$31,$25
 	addu	$3,$fp,96
 	addu	$2,$fp,112

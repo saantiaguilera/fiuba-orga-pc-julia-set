@@ -14,11 +14,11 @@ por dibujar. Valor por defecto: 4.
 defecto: 4.
 
 -o: Permite colocar la imagen de salida, (en formato PGM) en el archivo pasado como
-argumento; o por salida estándar (stdout) si el argumento es “-”.
+argumento; o por salida estándar (stdout) si el argumento es "-".
 
--h: Help. Brinda esta interfaz de ayuda por salida estandar.
+-h: Help. Brinda esta interfaz de ayuda por salida estándar.
 
--v: Version. Brinda informacion acerca de la version del producto.
+-v: Version. Brinda información acerca de la versión del producto.
 
 Ejemplo de uso:
-./julia-set -w 6 -H 5 -o juli.pgm -r 720x1200 -c +0.12-0.08i -C +0.20-0.09i
+./tp0 -w 6 -H 5 -o juli.pgm -r 720x1200 -c +0.12-0.08i -C +0.20-0.09i  

@@ -25,8 +25,8 @@ function run_with_return_value_expected () {
 	echo "---------------------------------------------"
 }
 
-gmake clean >/dev/null
-gmake >/dev/null
+#gmake clean >/dev/null
+#gmake >/dev/null
 
 #Test with no params, should return no_output
 run_with_return_value_expected "" $err_no_output

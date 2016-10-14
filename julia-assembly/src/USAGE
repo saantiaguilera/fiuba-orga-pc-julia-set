@@ -1,0 +1,33 @@
+Compilación a secas, sin funciones adicionales:
+
+% make
+
+Para compilar con el compilador de Intel:
+
+% make -f Makefile.init Makefiles CC="/opt/icc/bin/icc"
+% make
+
+Para compilar con Tiny CC (tcc):
+
+make -f Makefile.init Makefiles CC="/usr/bin/tcc" AUXLIBS="-lm"
+make
+
+Para compilar con assertions:
+
+% make -f Makefile.init Makefiles CCARGS="-DDEBUG"
+% make
+
+Para compilar en un entorno x86 de 64 bits:
+
+% make -f Makefile.init Makefiles CCARGS="-m32"
+% make
+
+Para apagar las optimizaciones:
+
+% make -f Makefile.init Makefiles OPT="-O0"
+% make
+
+Para hacer profiling con gprof:
+
+$ make -f Makefile.init Makefiles CCARGS="-pg" AUXLIBS="-lc_p"
+$ make

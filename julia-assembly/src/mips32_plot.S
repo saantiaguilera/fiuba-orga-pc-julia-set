@@ -21,111 +21,151 @@ mips32_plot:
     ###############################################################
     # Push stack frame
     subu $sp, $sp, 64	# push stack pointer down
-    sw $fp, 60($sp)		# store fp on mem(sp + 60)
-    sw $gp, 56($sp)		# store gp on mem(sp + 56)
-    move $fp, $sp		# fp = sp
-    sw $a0, 64($fp)		# store params on mem(fp + 64) (callee's stack frame)
+    sw $fp, 60($sp)	# store fp on mem(sp + 60)
+    sw $gp, 56($sp)	# store gp on mem(sp + 56)
+    move $fp, $sp	# fp = sp
+    sw $a0, 64($fp)	# store params on mem(fp + 64) (callee's stack frame)
     ###############################################################
 
-	move $t0, $a0	# params on t0
+    move $t0, $a0	# params on t0
 
-	lw $t1, 24($t0)	# cpr = params->cp_re on t1
-	lw $t2, 28($t0) # cpi = params->cp_im on t2
+    lw $t1, 24($t0)	# cpr = params->cp_re on t1
+    lw $t2, 28($t0) 	# cpi = params->cp_im on t2
 	
-	#### Hace falta abrir el fd? ####
+    #### Hace falta abrir el fd? ####
 	
-	lw $t3, 56($t0) # params->fd on t3
+    lw $t3, 44($t0)	# params->fd on t3
 	
-	###############################################################
+    ###############################################################
     # Write PGM header
     
     # Write "P2\n"
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
-    la $a1, header		# address of buffer from which to write
-    li $a2, 3			# buffer length
-    syscall				# write to file
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, header	# address of buffer from which to write
+    li $a2, 3		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write params->x_res
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
-    la $a1, 32($t0)		# address of buffer from which to write
-    li $a2, 8			# buffer length
-    syscall				# write to file
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, 32($t0)	# address of buffer from which to write
+    li $a2, 8		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write "\n"
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
     la $a1, line_break	# address of buffer from which to write
-    li $a2, 1			# buffer length
-    syscall				# write to file
+    li $a2, 1		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write params->y_res
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
-    la $a1, 40($t0)		# address of buffer from which to write
-    li $a2, 8			# buffer length
-    syscall				# write to file
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, 36($t0)	# address of buffer from which to write
+    li $a2, 8		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write "\n"
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
     la $a1, line_break	# address of buffer from which to write
-    li $a2, 1			# buffer length
-    syscall				# write to file
+    li $a2, 1		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write params->shades
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
-    la $a1, 48($t0)		# address of buffer from which to write
-    li $a2, 8			# buffer length
-    syscall				# write to file
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, 40($t0)	# address of buffer from which to write
+    li $a2, 8		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write "\n"
-    li $v0, 15			# system call for write to file
-    move $a0, $t3		# file descriptor
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
     la $a1, line_break	# address of buffer from which to write
-    li $a2, 1			# buffer length
-    syscall				# write to file
+    li $a2, 1		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     ###############################################################
 
-
-	#### todo ####
-
-
-
+    ###############################################################
+    # Barremos la región rectangular del plano complejo comprendida 
+    # entre (parms->UL_re, parms->UL_im) y (parms->LR_re, parms->LR_im).
+    # El parámetro de iteración es el punto (cr, ci).
+	
+	li $t4, 0		# y = 0 on t4
+	lw $t5, 4($t0)		# ci = parms->UL_im on t5
+	lw $t6, 36($t0)		# parms->y_res on t6
+	lw $t7, 20($t0)		# parms->d_im on t7
+UL_im_loop:
+	beq $t4, $t6, flush	# y < parms->y_res
+	
+	li $t8, 0		# x = 0 on t8
+	lw $t9, 0($t0)		# cr = parms->UL_re on t9
+	lw $t10, 32($t0)	# parms->x_res on t10
+	lw $t11, 16($t0)	# parms->d_re on t11
+UL_re_loop:
+	beq $t8, $t10, UL_im_icr	# x < parms->x_res
+	#TODO
+	# zr = cr
+	# zi = ci
+	
+    ###############################################################
+    # Determinamos el nivel de brillo asociado al punto
+    # (cr, ci), usando la fórmula compleja recurrente 
+    # f = f^3 + c.
+	
+    #TODO
+    ###############################################################
+	
+UL_re_icr:
+	addi $t8, $t8, 1 	# ++x
+	add $t9, $t9, $t11	# cr -= parms->d_re
+	j UL_re_loop
+	
+UL_im_icr:
+	addi $t4, $t4, 1 	# ++y
+	subu $t5, $t5, $t7	# ci -= parms->d_im
+	j UL_im_loop
+	
+    ###############################################################
+	
+flush:
+	#TODO
+	j success
 
 io_error:
 
-	###############################################################
+    ###############################################################
     # Write "i/o error.\n" on stderr
-    li $v0, 15				# system call for write to file
-    li $a0, 2				# file descriptor
-    la $a1, error_msg		# address of buffer from which to write
-    li $a2, 11				# buffer length
-    syscall					# write to file
-	###############################################################
+    li $v0, 15		# system call for write to file
+    li $a0, 2		# file descriptor
+    la $a1, error_msg	# address of buffer from which to write
+    li $a2, 11		# buffer length
+    syscall		# write to file
+    ###############################################################
 	
-	li $v0, 1	# return value 1
-	j return
+    li $v0, 1	# return value 1
+    j return
 
 success:
-	li $v0, 0	# return value 0
+    li $v0, 0	# return value 0
 
 return:
 
     ###############################################################
     # Pop stack frame
-    lw $fp, 60($sp)		# loads mem(sp + 60) on fp
-    lw $gp, 56($sp)		# loads mem(sp + 56) on gp
+    lw $fp, 60($sp)	# loads mem(sp + 60) on fp
+    lw $gp, 56($sp)	# loads mem(sp + 56) on gp
     addiu $sp, $sp, 64	# pop stack pointer up
     ###############################################################
 

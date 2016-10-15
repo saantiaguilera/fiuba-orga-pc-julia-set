@@ -21,16 +21,18 @@ mips32_plot:
     ###############################################################
     # Push stack frame
     subu $sp, $sp, 64	# push stack pointer down
-    sw $fp, 60($sp)	# store fp on mem(sp + 60)
-    sw $gp, 56($sp)	# store gp on mem(sp + 56)
-    move $fp, $sp	# fp = sp
-    sw $a0, 64($fp)	# store params on mem(fp + 64) (callee's stack frame)
+    sw $fp, 60($sp)		# store fp on mem(sp + 60)
+    sw $gp, 56($sp)		# store gp on mem(sp + 56)
+    move $fp, $sp		# fp = sp
+    sw $a0, 64($fp)		# store params on mem(fp + 64) (callee's stack frame)
     ###############################################################
 
     move $t0, $a0	# params on t0
 
     lw $t1, 24($t0)	# cpr = params->cp_re on t1
-    lw $t2, 28($t0) 	# cpi = params->cp_im on t2
+    sw $t1, 44($fp)	# store cpr on mem(sp + 44)
+    lw $t2, 28($t0) # cpi = params->cp_im on t2
+    sw $t2, 48($fp)	# store cpi on mem(sp + 48)
 	
     #### Hace falta abrir el fd? ####
 	
@@ -60,7 +62,7 @@ mips32_plot:
     move $a0, $t3	# file descriptor
     la $a1, line_break	# address of buffer from which to write
     li $a2, 1		# buffer length
-    syscall		# write to file
+    syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write params->y_res
@@ -68,7 +70,7 @@ mips32_plot:
     move $a0, $t3	# file descriptor
     la $a1, 36($t0)	# address of buffer from which to write
     li $a2, 8		# buffer length
-    syscall		# write to file
+    syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write "\n"
@@ -76,7 +78,7 @@ mips32_plot:
     move $a0, $t3	# file descriptor
     la $a1, line_break	# address of buffer from which to write
     li $a2, 1		# buffer length
-    syscall		# write to file
+    syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write params->shades
@@ -84,7 +86,7 @@ mips32_plot:
     move $a0, $t3	# file descriptor
     la $a1, 40($t0)	# address of buffer from which to write
     li $a2, 8		# buffer length
-    syscall		# write to file
+    syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
     
     # Write "\n"
@@ -113,17 +115,29 @@ UL_im_loop:
 UL_re_loop:
 	lw $t6, 32($t0)		# parms->x_res on t6
 	beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
-	#TODO
-	# zr = cr
-	# zi = ci
 	
+	move $t1, $t8		# zr = cr on t1
+	move $t2, $t5		# zi = ci on t2    
+
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
     # (cr, ci), usando la fórmula compleja recurrente 
     # f = f^3 + c.
 	
-    #TODO
+	li $t9, 0			# c = 0 on t9
+shades_loop:
+	lw $t6, 40($t0)		# parms->shades on t6
+	beq $t9, $t6, write	# if (c < parms->shades) continue
+ 
+	#TODO shades loop content
+
+	addi $t9, $t9, 1	# ++c
+	j shades_loop
+
     ###############################################################
+
+write:
+	#TODO
 	
 UL_re_icr:
 	addi $t7, $t7, 1 	# ++x
@@ -147,11 +161,11 @@ io_error:
 
     ###############################################################
     # Write "i/o error.\n" on stderr
-    li $v0, 15		# system call for write to file
-    li $a0, 2		# file descriptor
+    li $v0, 15			# system call for write to file
+    li $a0, 2			# file descriptor
     la $a1, error_msg	# address of buffer from which to write
-    li $a2, 11		# buffer length
-    syscall		# write to file
+    li $a2, 11			# buffer length
+    syscall				# write to file
     ###############################################################
 	
     li $v0, 1	# return value 1
@@ -164,8 +178,8 @@ return:
 
     ###############################################################
     # Pop stack frame
-    lw $fp, 60($sp)	# loads mem(sp + 60) on fp
-    lw $gp, 56($sp)	# loads mem(sp + 56) on gp
+    lw $fp, 60($sp)		# loads mem(sp + 60) on fp
+    lw $gp, 56($sp)		# loads mem(sp + 56) on gp
     addiu $sp, $sp, 64	# pop stack pointer up
     ###############################################################
 

@@ -10,6 +10,8 @@ header:
 	.asciiz "P2\n"
 line_break:
 	.ascii "\n"
+error_msg:
+	.asciiz "i/o error.\n"
 
 	.text
 	.abicalls
@@ -30,9 +32,9 @@ mips32_plot:
     move $t0, $a0	# params on t0
 
     lw $t1, 24($t0)	# cpr = params->cp_re on t1
-    sw $t1, 44($fp)	# store cpr on mem(sp + 44)
+    sw $t1, 44($fp)	# store cpr on mem(fp + 44)
     lw $t2, 28($t0)	# cpi = params->cp_im on t2
-    sw $t2, 48($fp)	# store cpi on mem(sp + 48)
+    sw $t2, 48($fp)	# store cpi on mem(fp + 48)
 
     #### Hace falta abrir el fd? ####
 
@@ -137,7 +139,27 @@ shades_loop:
     ###############################################################
 
 write:
-    #TODO
+    ###############################################################
+    # Write "c\n"
+
+    sw $t9, 36($fp)	# store c on mem(fp + 36)
+
+    # Write c
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, 40($t0)	# address of buffer from which to write
+    li $a2, 36($fp)	# buffer length
+    syscall		# write to file
+    bltz $v0, io_error	# if v0 < 0, io error
+
+    # Write "\n"
+    li $v0, 15		# system call for write to file
+    move $a0, $t3	# file descriptor
+    la $a1, line_break	# address of buffer from which to write
+    li $a2, 1		# buffer length
+    syscall		# write to file
+    bltz $v0, io_error	# if v0 < 0, io error
+    ###############################################################
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x
@@ -168,7 +190,7 @@ io_error:
     syscall		# write to file
     ###############################################################
 
-    li $v0, 1	# return value 1
+    li $v0, -1	# return value -1
     j return
 
 success:

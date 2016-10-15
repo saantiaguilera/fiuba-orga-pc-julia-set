@@ -1,17 +1,18 @@
-.text
-.abicalls
-.align 2 #Ni idea si hay que poner esto
-.global mips32_plot
-.ent mips32_plot
+#include <mips/regdef.h>
+
+	.text
+	.abicalls
+	.global mips32_plot
+	.ent mips32_plot
 
 mips32_plot:
     ###############################################################
     # Push stack frame
-    subu sp, sp, 8
-    sw $fp, 4(sp)
-    sw $gp, 0(sp)
-    move $fp, sp
-    sw a0, 8($fp)
+    subu $sp, $sp, 64	# push stack pointer down
+    sw $fp, 60($sp)		# store $fp on mem($sp + 60)
+    sw $gp, 56($sp)		# store $gp on mem($sp + 56)
+    move $fp, $sp		# $fp = $sp
+    sw $a0, 64($fp)		# store $a0 on mem($fp + 64)
     ###############################################################
 
 
@@ -29,9 +30,9 @@ write:
 return:
     ###############################################################
     # Pop stack frame
-    lw $fp, 4(sp)
-    lw $gp, 0(sp)
-    addiu sp, sp, 8
+    lw $fp, 60($sp)		# loads mem($sp + 60) on $fp
+    lw $gp, 56($sp)		# loads mem($sp + 56) on $gp
+    addiu $sp, $sp, 64	# pop stack pointer up
     ###############################################################
 
     jr $ra # return

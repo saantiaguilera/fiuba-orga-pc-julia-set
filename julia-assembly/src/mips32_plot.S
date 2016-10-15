@@ -101,20 +101,18 @@ mips32_plot:
     # Barremos la región rectangular del plano complejo comprendida 
     # entre (parms->UL_re, parms->UL_im) y (parms->LR_re, parms->LR_im).
     # El parámetro de iteración es el punto (cr, ci).
-	
+
 	li $t4, 0		# y = 0 on t4
 	lw $t5, 4($t0)		# ci = parms->UL_im on t5
-	lw $t6, 36($t0)		# parms->y_res on t6
-	lw $t7, 20($t0)		# parms->d_im on t7
 UL_im_loop:
-	beq $t4, $t6, flush	# y < parms->y_res
-	
-	li $t8, 0		# x = 0 on t8
-	lw $t9, 0($t0)		# cr = parms->UL_re on t9
-	lw $t10, 32($t0)	# parms->x_res on t10
-	lw $t11, 16($t0)	# parms->d_re on t11
+	lw $t6, 36($t0)		# parms->y_res on t6
+	beq $t4, $t6, flush	# if (y < parms->y_res) continue
+
+	li $t7, 0		# x = 0 on t7
+	lw $t8, 0($t0)		# cr = parms->UL_re on t8
 UL_re_loop:
-	beq $t8, $t10, UL_im_icr	# x < parms->x_res
+	lw $t6, 32($t0)		# parms->x_res on t6
+	beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 	#TODO
 	# zr = cr
 	# zi = ci
@@ -128,13 +126,15 @@ UL_re_loop:
     ###############################################################
 	
 UL_re_icr:
-	addi $t8, $t8, 1 	# ++x
-	add $t9, $t9, $t11	# cr -= parms->d_re
+	addi $t7, $t7, 1 	# ++x
+	lw $t6, 16($t0)		# parms->d_re on t6
+	add $t8, $t8, $t6	# cr += parms->d_re
 	j UL_re_loop
 	
 UL_im_icr:
 	addi $t4, $t4, 1 	# ++y
-	subu $t5, $t5, $t7	# ci -= parms->d_im
+	lw $t6, 20($t0)		# parms->d_im on t6
+	subu $t5, $t5, $t6	# ci -= parms->d_im
 	j UL_im_loop
 	
     ###############################################################

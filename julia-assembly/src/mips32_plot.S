@@ -5,6 +5,12 @@
 #define BUF_SZ 8192
 #endif
 
+	.data
+header: 
+	.asciiz "P2\n"
+l_break:
+	.ascii "\n"
+
 	.text
 	.abicalls
 	.global mips32_plot
@@ -32,14 +38,61 @@ mips32_plot:
 	
 	###############################################################
     # Write PGM header
+    
+    # Write "P2\n"
     li   $v0, 15		# system call for write to file
     move $a0, $t3		# file descriptor
-    la   $a1, 	# address of buffer from which to write
-    li   $a2, 	# hardcoded buffer length
+    la   $a1, header	# address of buffer from which to write
+    li   $a2, 3			# buffer length
     syscall				# write to file
+    
+    # Write params->x_res
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, 32($t0)	# address of buffer from which to write
+    li   $a2, 8			# buffer length
+    syscall				# write to file
+    
+    # Write "\n"
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, l_break	# address of buffer from which to write
+    li   $a2, 1			# buffer length
+    syscall				# write to file
+    
+    # Write params->y_res
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, 40($t0)	# address of buffer from which to write
+    li   $a2, 8			# buffer length
+    syscall				# write to file
+    
+    # Write "\n"
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, l_break	# address of buffer from which to write
+    li   $a2, 1			# buffer length
+    syscall				# write to file
+    
+    # Write params->shades
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, 48($t0)	# address of buffer from which to write
+    li   $a2, 8			# buffer length
+    syscall				# write to file
+    
+    # Write "\n"
+    li   $v0, 15		# system call for write to file
+    move $a0, $t3		# file descriptor
+    la   $a1, l_break	# address of buffer from which to write
+    li   $a2, 1			# buffer length
+    syscall				# write to file
+    
     ###############################################################
 
+
 	#### todo ####
+
 
 return:
 

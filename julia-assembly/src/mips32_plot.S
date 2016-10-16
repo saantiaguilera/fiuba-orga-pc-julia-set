@@ -20,7 +20,7 @@ buffer_ini:
 	.global mips32_plot
 	.ent mips32_plot
 
-.macro wirtem (%fd, %buffer, %bufferLen)
+.macro writem (%fd, %buffer, %bufferLen)
 	li $v0, 15		# system call for write to file
     move $a0, $fd 		# file descriptor
     la $a1, %buffer		# address of buffer from which to write
@@ -142,8 +142,8 @@ mips32_plot:
     li $t4, 0			# y = 0 on t4
     lw $t5, 4($t0)		# ci = parms->UL_im on t5
 UL_im_loop:
-    lw $t6, 36($t0)		# parms->y_res on t6
-    beq $t4, $t6, flush		# if (y < parms->y_res) continue
+    lw $t6, 36($t0)		    # parms->y_res on t6
+    beq $t4, $t6, fflush	# if (y < parms->y_res) continue
 
     li $t7, 0			# x = 0 on t7
     lw $t8, 0($t0)		# cr = parms->UL_re on t8
@@ -172,6 +172,12 @@ shades_loop:
     ###############################################################
 
 write:
+    la $t8, 40($t0) # CHANGE INTO PROPER REG
+    li $t9, 36($fp)# CHANGE INTO PROPER REG
+    writem $f3, $t8, $t9# CHANGE INTO PROPER REG
+    lb $t8, line_break# CHANGE INTO PROPER REG
+    writem $f3, $t8, 1# CHANGE INTO PROPER REG
+
     ###############################################################
     # Write "c\n"
 
@@ -208,12 +214,21 @@ UL_im_icr:
 
     ###############################################################
 
-flush:
-    #TODO
+fflush:
+    #TODO it flushes remaining data into file, but if thats the case it results
+    # in an error
+    lw $t1, buffer_ini # CHANGE INTO PROPER REG
+    bne $t0, $t1, fflush_error # CHANGE INTO PROPER REG
     j success
+
+fflush_error:
+    writem $t3, buffer_ini, $t0 # fd, buffer_ini, used size of buff
+    j io_error
+
 
 io_error:
 
+    writem 2, error_msg, 11
     ###############################################################
     # Write "i/o error.\n" on stderr
     li $v0, 15		# system call for write to file

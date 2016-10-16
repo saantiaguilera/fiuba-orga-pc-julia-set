@@ -18,6 +18,15 @@ error_msg:
 	.global mips32_plot
 	.ent mips32_plot
 
+.macro wirtem (%fd, %buffer, %bufferLen)
+	li $v0, 15		# system call for write to file
+    	move $a0, $fd 		# file descriptor
+    	la $a1, %buffer		# address of buffer from which to write
+    	li $a2, %bufferLen	# buffer length
+    	syscall			# write to file
+    	bltz $v0, io_error	# if v0 < 0, io error
+.end_macro
+
 mips32_plot:
 
     ###############################################################

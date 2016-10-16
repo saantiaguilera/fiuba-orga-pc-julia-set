@@ -13,7 +13,7 @@ line_break:
 error_msg:
 	.asciiz "i/o error.\n"
 buffer_ini:
-    .space BUF_SZ
+    	.space BUF_SZ
 
 	.text
 	.abicalls
@@ -22,21 +22,21 @@ buffer_ini:
 
 .macro writem (%fd, %buffer, %bufferLen)
 	li $v0, 15		# system call for write to file
-    move $a0, $fd 		# file descriptor
-    la $a1, %buffer		# address of buffer from which to write
-    li $a2, %bufferLen	# buffer length
-    syscall			# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
+    	move $a0, $fd 		# file descriptor
+    	la $a1, %buffer		# address of buffer from which to write
+    	li $a2, %bufferLen	# buffer length
+    	syscall			# write to file
+    	bltz $v0, io_error	# if v0 < 0, io error
 .end_macro
 
 # Going to need a register to store the buff location
 .macro storeInBuff (%data, %len)
-    sw $data, ($t0) # CHANGE INTO PROPER REG
-    addi $t0, $zero, %len
+    	sw $data, ($t0) # CHANGE INTO PROPER REG
+    	addi $t0, $zero, %len
 .end_macro
 
 .macro emptyBuff
-    lw $t0, buffer_ini # CHANGE INTO PROPER REG
+    	lw $t0, buffer_ini # CHANGE INTO PROPER REG
 .end_macro
 
 mips32_plot:
@@ -66,7 +66,7 @@ mips32_plot:
 
     lw $t4, (header)
     storeInBuff $t1 3
-    lw $t4, 32($t0) # Is the \n necessary before the 70 chars?
+    lw $t4, 32($t0)
     storeInBuff $t4, 8
     lw $t4, 36($t0)
     storeInBuff $t4, 8

@@ -30,9 +30,9 @@ buffer_ini:
 .end_macro
 
 # Going to need a register to store the buff location
-.macro storeInBuff (%data)
+.macro storeInBuff (%data, %len)
     sw $data, ($t0) # CHANGE INTO PROPER REG
-    addi $t0, $zero, 4 
+    addi $t0, $zero, %len
 .end_macro
 
 .macro emptyBuff
@@ -64,6 +64,18 @@ mips32_plot:
     ###############################################################
     # Write PGM header
 
+    lw $t4, (header)
+    storeInBuff $t1 3
+    lw $t4, 32($t0) # Is the \n necessary before the 70 chars?
+    storeInBuff $t4, 8
+    lw $t4, 36($t0)
+    storeInBuff $t4, 8
+    lw $t4, 40($t0)
+    storeInBuff $t4, 8
+    lw $t4, (line_break)
+    storeInBuff $t4, 1
+
+    # We dont write anything yet, the buffer is not full
     # Write "P2\n"
     li $v0, 15		# system call for write to file
     move $a0, $t3	# file descriptor

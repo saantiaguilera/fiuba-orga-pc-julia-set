@@ -20,14 +20,13 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
-.macro write_file
+.macro write_file (%fd)
     li $v0, 15		# system call for write to file
-    move $a0, $t2 		# file descriptor
+    move $a0, $fd 		# file descriptor
     la $a1, $t0		# address of buffer from which to write
     li $a2, $t1	# buffer length
     syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
-    empty_buffer
 .end_macro
 
 # Going to need a register to store the buff location
@@ -44,7 +43,8 @@ buffer_ini:
 .end_macro
 
 flush_buffer:
-    write_file
+    write_file $t2
+	empty_buffer
     # j line 37
 
 mips32_plot:
@@ -120,7 +120,7 @@ UL_re_loop:
     li $t9, 0			# c = 0 on t9
 shades_loop:
     lw $t6, 40($t0)		# parms->shades on t6
-    beq $t9, $t6, write		# if (c < parms->shades) continue
+    beq $t9, $t6, write_shade		# if (c < parms->shades) continue
 
     #TODO shades loop content
 
@@ -129,34 +129,12 @@ shades_loop:
 
     ###############################################################
 
-write:
-    la $t8, 40($t0) # CHANGE INTO PROPER REG
-    li $t9, 36($fp)# CHANGE INTO PROPER REG
-    write_file $f3, $t8, $t9# CHANGE INTO PROPER REG
-    lb $t8, line_break# CHANGE INTO PROPER REG
-    write_file $f3, $t8, 1# CHANGE INTO PROPER REG
-
-    ###############################################################
-    # Write "c\n"
-
-    sw $t9, 36($fp)	# store c on mem(fp + 36)
-
-    # Write c
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 40($t0)	# address of buffer from which to write
-    li $a2, 36($fp)	# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-    ###############################################################
+write_shade:
+	# Shades are being calculated in t9. So we have to write the t9 color value
+	# Appending in buffer color\n
+	write_buffer $t9, 4
+	lw $t4, line_break
+	write_buffer $t4, 1
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x
@@ -170,31 +148,12 @@ UL_im_icr:
     subu $t5, $t5, $t6		# ci -= parms->d_im
     j UL_im_loop
 
-    ###############################################################
-
 fflush:
-    #TODO it flushes remaining data into file, but if thats the case it results
-    # in an error    
-    bgt $t1, 0, write_file 
+    bgt $t1, 0, flush_buffer
     j success
 
-fflush_error:
-    writem $t3, buffer_ini, $t0 # fd, buffer_ini, used size of buff
-    j io_error
-
-
 io_error:
-
     write_file 2, error_msg, 11
-    ###############################################################
-    # Write "i/o error.\n" on stderr
-    li $v0, 15		# system call for write to file
-    li $a0, 2		# file descriptor
-    la $a1, error_msg	# address of buffer from which to write
-    li $a2, 11		# buffer length
-    syscall		# write to file
-    ###############################################################
-
     li $v0, -1	# return value -1
     j return
 
@@ -202,7 +161,6 @@ success:
     li $v0, 0	# return value 0
 
 return:
-
     ###############################################################
     # Pop stack frame
     lw $fp, 60($sp)	# loads mem(sp + 60) on fp

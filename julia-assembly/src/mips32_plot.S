@@ -23,18 +23,18 @@ buffer_ini:
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
     li $v0, 15		# system call for write to file
-    move $a0, $fd 		# file descriptor
+    move $a0, $fd 	# file descriptor
     la $a1, $t1		# address of buffer from which to write
-    li $a2, $t2	# buffer length
-    syscall			# write to file
+    li $a2, $t2		# buffer length
+    syscall		# write to file
     bltz $v0, io_error	# if v0 < 0, io error
 .end_macro
 
 # Going to need a register to store the buff location
 .macro write_buffer (%data, %len)
     bgt $t2, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
-    sw $data, ($t1) # CHANGE INTO PROPER REG
-    addi $t1, 0, $len
+    sw $data, 0($t1) # CHANGE INTO PROPER REG
+    li $t1, $len
     addi $t2, $t2, $len
 .end_macro
 
@@ -90,7 +90,7 @@ mips32_plot:
     lw $t4, line_break
     write_buffer $t4, 1
 
-	###############################################################
+    ###############################################################
 
     ###############################################################
     # Barremos la región rectangular del plano complejo comprendida 
@@ -100,7 +100,7 @@ mips32_plot:
     li $t4, 0			# y = 0 on t4
     lw $t5, 4($t0)		# ci = parms->UL_im on t5
 UL_im_loop:
-    lw $t6, 36($t0)		    # parms->y_res on t6
+    lw $t6, 36($t0)		# parms->y_res on t6
     beq $t4, $t6, fflush	# if (y < parms->y_res) continue
 
     li $t7, 0			# x = 0 on t7
@@ -109,8 +109,15 @@ UL_re_loop:
     lw $t6, 32($t0)		# parms->x_res on t6
     beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 
-    move $t1, $t8		# zr = cr on t1
-    move $t2, $t5		# zi = ci on t2
+    #### Save state in stack
+    sw $t4, 32($fp)		# store y on mem(fp + 32)
+    sw $t5, 4($fp)		# store ci on mem(fp + 4)
+    sw $t7, 28($fp)		# store x on mem(fp + 28)
+    sw $t8, 0($fp)		# store cr on mem(fp)
+    ####
+
+    move $t4, $t8		# zr = cr on t4
+    move $t5, $t5		# zi = ci on t5
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
@@ -120,9 +127,23 @@ UL_re_loop:
     li $t9, 0			# c = 0 on t9
 shades_loop:
     lw $t6, 40($t0)		# parms->shades on t6
-    beq $t9, $t6, write_shade		# if (c < parms->shades) continue
+    beq $t9, $t6, write_shade	# if (c < parms->shades) continue
 
-    #TODO shades loop content
+    mul $t6, $t4, $t4		# zr * zr on t6
+    mul $t7, $t5, $t5		# zi * zi on t7
+
+    addu $t8, $t6, $t7		# absz = zr² + i² on 8
+    addiu $t8, $t8, -4		# absz - 4 on t8 
+    bgtz $t8, write_shade	# if (absz - 4 > 0) write_shade
+    
+    #### TODO
+    # sr = zr*zr - zi*zi + cpr
+    # si = 2 * zr * zi + cpi
+    addu $t8 
+
+    move $t4, 			# zr = sr
+    move $t5,			# zi = si
+    ####
 
     addi $t9, $t9, 1		# ++c
     j shades_loop
@@ -130,11 +151,18 @@ shades_loop:
     ###############################################################
 
 write_shade:
-	# Shades are being calculated in t9. So we have to write the t9 color value
-	# Appending in buffer color\n
-	write_buffer $t9, 4
-	lw $t4, line_break
-	write_buffer $t4, 1
+    # Shades are being calculated in t9. So we have to write the t9 color value
+    # Appending in buffer color\n
+    write_buffer $t9, 4
+    lw $t6, line_break
+    write_buffer $t6, 1
+
+    #### Restore state
+    lw $t4, 32($fp)
+    lw $t5, 4($fp)
+    lw $t7, 28($fp)
+    lw $t8, 0($fp)
+    ####
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x

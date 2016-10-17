@@ -77,18 +77,18 @@ mips32_plot:
 
     lw $t4, 32($t0)
     write_buffer $t4, 8
-	lw $t4, line_break
-	write_buffer $t4, 1
+    lw $t4, line_break
+    write_buffer $t4, 1
     
-	lw $t4, 36($t0)
+    lw $t4, 36($t0)
     write_buffer $t4, 8
     lw $t4, line_break
-	write_buffer $t4, 1
+    write_buffer $t4, 1
 	
-	lw $t4, 40($t0)
+    lw $t4, 40($t0)
     write_buffer $t4, 8
-	lw $t4, line_break
-	write_buffer $t4, 1
+    lw $t4, line_break
+    write_buffer $t4, 1
 
 	###############################################################
 

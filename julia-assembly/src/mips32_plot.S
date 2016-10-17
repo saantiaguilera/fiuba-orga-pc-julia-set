@@ -65,7 +65,7 @@ mips32_plot:
     # Write PGM header
 
     lw $t4, (header)
-    storeInBuff $t1 3
+    storeInBuff $t4 3
     lw $t4, 32($t0)
     storeInBuff $t4, 8
     lw $t4, 36($t0)

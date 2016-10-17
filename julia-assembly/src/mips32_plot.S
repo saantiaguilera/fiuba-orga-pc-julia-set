@@ -20,30 +20,30 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
+# Buffer stored in t8 / Buffer length in t7
 .macro write_file (%fd)
     li $v0, 15		# system call for write to file
     move $a0, $fd 		# file descriptor
-    la $a1, $t0		# address of buffer from which to write
-    li $a2, $t1	# buffer length
+    la $a1, $t8		# address of buffer from which to write
+    li $a2, $t7	# buffer length
     syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
 .end_macro
 
 # Going to need a register to store the buff location
-# $t1 using the buffer length
 .macro write_buffer (%data, %len)
-    bgt $t1, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
-    sw $data, ($t0) # CHANGE INTO PROPER REG
-    addi $t0, 0, $len
-    addi $t1, $t1, $len
+    bgt $t7, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
+    sw $data, ($t8) # CHANGE INTO PROPER REG
+    addi $t8, 0, $len
+    addi $t7, $t7, $len
 .end_macro
 
 .macro empty_buffer
-    lw $t0, buffer_ini # CHANGE INTO PROPER REG
+    lw $t8, buffer_ini # CHANGE INTO PROPER REG
 .end_macro
 
 flush_buffer:
-    write_file $t2
+    write_file $t3
 	empty_buffer
     # j line 37
 
@@ -149,7 +149,7 @@ UL_im_icr:
     j UL_im_loop
 
 fflush:
-    bgt $t1, 0, flush_buffer
+    bgt $t7, 0, flush_buffer
     j success
 
 io_error:

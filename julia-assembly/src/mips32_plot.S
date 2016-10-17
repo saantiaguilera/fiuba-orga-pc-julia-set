@@ -186,7 +186,12 @@ fflush:
     j success
 
 io_error:
-    write_file 2, error_msg, 11
+    li $v0, 15
+	move $a0, 2
+	la $a1, error_msg
+	li $a2, 11
+	syscall
+
     li $v0, -1	# return value -1
     j return
 

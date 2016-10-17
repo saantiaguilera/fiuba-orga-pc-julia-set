@@ -20,31 +20,31 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
-.macro writem (%fd)
+.macro write_file
     li $v0, 15		# system call for write to file
-    move $a0, $fd 		# file descriptor
+    move $a0, $t2 		# file descriptor
     la $a1, $t0		# address of buffer from which to write
     li $a2, $t1	# buffer length
     syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
-    ba emptyBuff
+    empty_buffer
 .end_macro
 
 # Going to need a register to store the buff location
 # $t1 using the buffer length
-.macro writeBuffer (%fd, %data, %len)
-    bgt $t1, BUF_SZ, write2 # Store sp location in stack or somewhere so write can jump back
+.macro write_buffer (%data, %len)
+    bgt $t1, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
     sw $data, ($t0) # CHANGE INTO PROPER REG
     addi $t0, 0, $len
     addi $t1, $t1, $len
 .end_macro
 
-.macro emptyBuff
+.macro empty_buffer
     lw $t0, buffer_ini # CHANGE INTO PROPER REG
 .end_macro
 
-write2:
-    writem $t2
+flush_buffer:
+    write_file
     # j line 37
 
 mips32_plot:
@@ -70,77 +70,27 @@ mips32_plot:
     lw $t3, 44($t0)	# params->fd on t3
 
     ###############################################################
-    # Write PGM header
+    # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
 
     lw $t4, (header)
-    storeInBuff $t4 3
+    write_buffer $t4 3
+
     lw $t4, 32($t0)
-    storeInBuff $t4, 8
-    lw $t4, 36($t0)
-    storeInBuff $t4, 8
-    lw $t4, 40($t0)
-    storeInBuff $t4, 8
-    lw $t4, (line_break)
-    storeInBuff $t4, 1
+    write_buffer $t4, 8
+	lw $t4, line_break
+	write_buffer $t4, 1
+    
+	lw $t4, 36($t0)
+    write_buffer $t4, 8
+    lw $t4, line_break
+	write_buffer $t4, 1
+	
+	lw $t4, 40($t0)
+    write_buffer $t4, 8
+	lw $t4, line_break
+	write_buffer $t4, 1
 
-    # We dont write anything yet, the buffer is not full
-    # Write "P2\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, header	# address of buffer from which to write
-    li $a2, 3		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write params->x_res
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 32($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write params->y_res
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 36($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write params->shades
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 40($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    ###############################################################
+	###############################################################
 
     ###############################################################
     # Barremos la región rectangular del plano complejo comprendida 
@@ -182,9 +132,9 @@ shades_loop:
 write:
     la $t8, 40($t0) # CHANGE INTO PROPER REG
     li $t9, 36($fp)# CHANGE INTO PROPER REG
-    writem $f3, $t8, $t9# CHANGE INTO PROPER REG
+    write_file $f3, $t8, $t9# CHANGE INTO PROPER REG
     lb $t8, line_break# CHANGE INTO PROPER REG
-    writem $f3, $t8, 1# CHANGE INTO PROPER REG
+    write_file $f3, $t8, 1# CHANGE INTO PROPER REG
 
     ###############################################################
     # Write "c\n"
@@ -225,7 +175,7 @@ UL_im_icr:
 fflush:
     #TODO it flushes remaining data into file, but if thats the case it results
     # in an error    
-    bgt $t1, 0, writem 
+    bgt $t1, 0, write_file 
     j success
 
 fflush_error:
@@ -235,7 +185,7 @@ fflush_error:
 
 io_error:
 
-    writem 2, error_msg, 11
+    write_file 2, error_msg, 11
     ###############################################################
     # Write "i/o error.\n" on stderr
     li $v0, 15		# system call for write to file

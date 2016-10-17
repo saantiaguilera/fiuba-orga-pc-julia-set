@@ -13,6 +13,7 @@ line_break:
 error_msg:
 	.asciiz "i/o error.\n"
 buffer_ini:
+    .align 2 # We will be storing words in the buffer, and .text should have it too.
     .space BUF_SZ
 
     .text
@@ -48,7 +49,6 @@ flush_buffer:
     # j line 37
 
 mips32_plot:
-
     ###############################################################
     # Push stack frame
     subu $sp, $sp, 64	# push stack pointer down
@@ -68,6 +68,10 @@ mips32_plot:
     #### Hace falta abrir el fd? ####
 
     lw $t3, 44($t0)	# params->fd on t3
+    
+    #### Inicializamos el buffer ####
+
+    empty_buffer
 
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"

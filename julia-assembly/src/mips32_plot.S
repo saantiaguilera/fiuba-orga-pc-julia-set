@@ -33,7 +33,7 @@ buffer_ini:
 # Going to need a register to store the buff location
 # $t1 using the buffer length
 .macro writeBuffer (%fd, %data, %len)
-    bgt $t1, BUF_SZ, writem %fd
+    bgt $t1, BUF_SZ, write2 # Store sp location in stack or somewhere so write can jump back
     sw $data, ($t0) # CHANGE INTO PROPER REG
     addi $t0, 0, $len
     addi $t1, $t1, $len
@@ -42,6 +42,10 @@ buffer_ini:
 .macro emptyBuff
     lw $t0, buffer_ini # CHANGE INTO PROPER REG
 .end_macro
+
+write2:
+    writem $t2
+    # j line 37
 
 mips32_plot:
 

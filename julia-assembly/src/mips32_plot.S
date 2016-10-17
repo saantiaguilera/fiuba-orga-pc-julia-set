@@ -20,19 +20,23 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
-.macro writem (%fd, %buffer, %bufferLen)
+.macro writem (%fd)
     li $v0, 15		# system call for write to file
     move $a0, $fd 		# file descriptor
-    la $a1, %buffer		# address of buffer from which to write
-    li $a2, %bufferLen	# buffer length
+    la $a1, $t0		# address of buffer from which to write
+    li $a2, $t1	# buffer length
     syscall			# write to file
     bltz $v0, io_error	# if v0 < 0, io error
+    ba emptyBuff
 .end_macro
 
 # Going to need a register to store the buff location
-.macro storeInBuff (%data, %len)
+# $t1 using the buffer length
+.macro writeBuffer (%fd, %data, %len)
+    bgt $t1, BUF_SZ, writem 
     sw $data, ($t0) # CHANGE INTO PROPER REG
     addi $t0, 0, $len
+    addi $t1, $t1, $len
 .end_macro
 
 .macro emptyBuff

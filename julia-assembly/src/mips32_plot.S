@@ -32,7 +32,7 @@ buffer_ini:
 # Going to need a register to store the buff location
 .macro storeInBuff (%data, %len)
     sw $data, ($t0) # CHANGE INTO PROPER REG
-    addi $t0, $zero, %len
+    addi $t0, 0, $len
 .end_macro
 
 .macro emptyBuff

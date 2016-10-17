@@ -187,10 +187,10 @@ fflush:
 
 io_error:
     li $v0, 15
-	move $a0, 2
-	la $a1, error_msg
-	li $a2, 11
-	syscall
+    move $a0, 2
+    la $a1, error_msg
+    li $a2, 11
+    syscall
 
     li $v0, -1	# return value -1
     j return

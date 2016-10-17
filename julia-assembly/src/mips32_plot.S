@@ -33,7 +33,7 @@ buffer_ini:
 # Going to need a register to store the buff location
 # $t1 using the buffer length
 .macro writeBuffer (%fd, %data, %len)
-    bgt $t1, BUF_SZ, writem 
+    bgt $t1, BUF_SZ, writem %fd
     sw $data, ($t0) # CHANGE INTO PROPER REG
     addi $t0, 0, $len
     addi $t1, $t1, $len

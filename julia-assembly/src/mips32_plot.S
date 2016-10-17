@@ -220,9 +220,8 @@ UL_im_icr:
 
 fflush:
     #TODO it flushes remaining data into file, but if thats the case it results
-    # in an error
-    lw $t1, buffer_ini # CHANGE INTO PROPER REG
-    bne $t0, $t1, fflush_error # CHANGE INTO PROPER REG
+    # in an error    
+    bgt $t1, 0, writem 
     j success
 
 fflush_error:

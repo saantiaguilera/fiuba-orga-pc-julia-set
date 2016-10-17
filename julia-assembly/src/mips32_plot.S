@@ -12,8 +12,9 @@ line_break:
 	.ascii "\n"
 error_msg:
 	.asciiz "i/o error.\n"
-buffer_ini:
+
     .align 2 # We will be storing words in the buffer, and .text should have it too.
+buffer_ini:
     .space BUF_SZ
 
     .text
@@ -34,13 +35,13 @@ buffer_ini:
 # Going to need a register to store the buff location
 .macro write_buffer (%data, %len)
     bgt $t2, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
-    sw $data, 0($t1) # CHANGE INTO PROPER REG
+    sw $data, 0($t1)
     li $t1, $len
     addi $t2, $t2, $len
 .end_macro
 
 .macro empty_buffer
-    lw $t1, buffer_ini # CHANGE INTO PROPER REG
+    lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
 
 flush_buffer:

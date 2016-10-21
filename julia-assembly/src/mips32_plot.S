@@ -153,7 +153,7 @@ shades_loop:
     # si = 2 * zr * zi + cpi
     push $t4 # push zr
     push $t5 # push zi
-    subu $t4, $t6, $t7
+    subu $t4, $t6, $t7 # zr**2 - zi**2 in t4 (sr)
     # addu $t4, CPR # cpr esta perdido en el stack
     pop $t5 # pop zi on t5
     pop $t6 # pop zr on t6
@@ -161,8 +161,10 @@ shades_loop:
     add $t7, $t7, $t7 # 2 * (zr*zi) 
     # addu $t7, $t7, CPI # idem cpr 
 
-    move $t4, 			# zr = sr
-    move $t5,			# zi = si
+    # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
+    # respectivamente
+    move $t4, $t4 	# zr = sr
+    move $t5, $t7   # zi = si
     ####
 
     addi $t9, $t9, 1		# ++c

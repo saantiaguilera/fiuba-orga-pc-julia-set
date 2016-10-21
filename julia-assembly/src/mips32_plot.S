@@ -144,14 +144,22 @@ shades_loop:
     mul $t6, $t4, $t4		# zr * zr on t6
     mul $t7, $t5, $t5		# zi * zi on t7
 
-    addu $t8, $t6, $t7		# absz = zr² + i² on 8
+    addu $t8, $t6, $t7		# absz = zr² + i² on t8
     addiu $t8, $t8, -4		# absz - 4 on t8 
     bgtz $t8, write_shade	# if (absz - 4 > 0) write_shade
     
     #### TODO
     # sr = zr*zr - zi*zi + cpr
     # si = 2 * zr * zi + cpi
-    addu $t8 
+    push $t4 # push zr
+    push $t5 # push zi
+    subu $t4, $t6, $t7
+    # addu $t4, CPR # cpr esta perdido en el stack
+    pop $t5 # pop zi on t5
+    pop $t6 # pop zr on t6
+    mul $t7, $t5, $t6 # (zr * zi)
+    add $t7, $t7, $t7 # 2 * (zr*zi) 
+    # addu $t7, $t7, CPI # idem cpr 
 
     move $t4, 			# zr = sr
     move $t5,			# zi = si

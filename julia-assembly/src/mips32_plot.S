@@ -21,6 +21,15 @@ buffer_ini:
     .abicalls
     .global mips32_plot
     .ent mips32_plot
+.macro push (%arg)
+    addi $sp, $sp, -4
+    sw %arg, 0($sp)
+.end_macro
+
+.macro pop (%reg) # %reg its a register that will hold the popped value
+    lw %reg, 0($sp)
+    addi $sp, $sp, 4
+.end_macro
 
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)

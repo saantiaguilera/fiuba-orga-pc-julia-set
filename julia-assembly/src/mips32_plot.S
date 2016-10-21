@@ -13,22 +13,50 @@ line_break:
 error_msg:
 	.asciiz "i/o error.\n"
 
-	.text
-	.abicalls
-	.global mips32_plot
-	.ent mips32_plot
+    .align 2 # We will be storing words in the buffer, and .text should have it too.
+buffer_ini:
+    .space BUF_SZ
 
-.macro wirtem (%fd, %buffer, %bufferLen)
-	li $v0, 15		# system call for write to file
-    	move $a0, $fd 		# file descriptor
-    	la $a1, %buffer		# address of buffer from which to write
-    	li $a2, %bufferLen	# buffer length
-    	syscall			# write to file
-    	bltz $v0, io_error	# if v0 < 0, io error
+    .text
+    .abicalls
+    .global mips32_plot
+    .ent mips32_plot
+
+.macro push (%arg)
+    addi $sp, $sp, -4
+    sw %arg, 0($sp)
+.end_macro
+
+.macro pop (%reg) # %reg its a register that will hold the popped value
+    lw %reg, 0($sp)
+    addi $sp, $sp, 4
+.end_macro
+
+# Buffer stored in t1 / Buffer length in t2
+.macro write_file (%fd)
+    li $v0, 15		# system call for write to file
+    move $a0, %fd 	# file descriptor
+    la $a1, $t1		# address of buffer from which to write
+    li $a2, $t2		# buffer length
+    syscall		# write to file
+    bltz $v0, io_error	# if v0 < 0, io error
+.end_macro
+
+# Going to need a register to store the buff location
+.macro write_buffer (%data, %len)
+    blt $t2, BUF_SZ, not_flush_buffer
+    write_file $t3
+	empty_buffer
+    not_flush_buffer: sw %data, 0($t1)
+    li $t1, %len
+    addi $t2, $t2, %len
+.end_macro
+
+.macro empty_buffer
+    lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
 
 mips32_plot:
-
     ###############################################################
     # Push stack frame
     subu $sp, $sp, 64	# push stack pointer down
@@ -48,65 +76,31 @@ mips32_plot:
     #### Hace falta abrir el fd? ####
 
     lw $t3, 44($t0)	# params->fd on t3
+    
+    #### Inicializamos el buffer ####
+
+    empty_buffer
 
     ###############################################################
-    # Write PGM header
+    # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
 
-    # Write "P2\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, header	# address of buffer from which to write
-    li $a2, 3		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
+    lw $t4, (header)
+    write_buffer $t4 3
 
-    # Write params->x_res
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 32($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write params->y_res
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 36($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write params->shades
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 40($t0)	# address of buffer from which to write
-    li $a2, 8		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
+    lw $t4, 32($t0)
+    write_buffer $t4, 8
+    lw $t4, line_break
+    write_buffer $t4, 1
+    
+    lw $t4, 36($t0)
+    write_buffer $t4, 8
+    lw $t4, line_break
+    write_buffer $t4, 1
+	
+    lw $t4, 40($t0)
+    write_buffer $t4, 8
+    lw $t4, line_break
+    write_buffer $t4, 1
 
     ###############################################################
 
@@ -119,7 +113,7 @@ mips32_plot:
     lw $t5, 4($t0)		# ci = parms->UL_im on t5
 UL_im_loop:
     lw $t6, 36($t0)		# parms->y_res on t6
-    beq $t4, $t6, flush		# if (y < parms->y_res) continue
+    beq $t4, $t6, fflush	# if (y < parms->y_res) continue
 
     li $t7, 0			# x = 0 on t7
     lw $t8, 0($t0)		# cr = parms->UL_re on t8
@@ -127,8 +121,15 @@ UL_re_loop:
     lw $t6, 32($t0)		# parms->x_res on t6
     beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 
-    move $t1, $t8		# zr = cr on t1
-    move $t2, $t5		# zi = ci on t2
+    #### Save state in stack
+    sw $t4, 32($fp)		# store y on mem(fp + 32)
+    sw $t5, 4($fp)		# store ci on mem(fp + 4)
+    sw $t7, 28($fp)		# store x on mem(fp + 28)
+    sw $t8, 0($fp)		# store cr on mem(fp)
+    ####
+
+    move $t4, $t8		# zr = cr on t4
+    move $t5, $t5		# zi = ci on t5
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
@@ -138,37 +139,52 @@ UL_re_loop:
     li $t9, 0			# c = 0 on t9
 shades_loop:
     lw $t6, 40($t0)		# parms->shades on t6
-    beq $t9, $t6, write		# if (c < parms->shades) continue
+    beq $t9, $t6, write_shade	# if (c < parms->shades) continue
 
-    #TODO shades loop content
+    mul $t6, $t4, $t4		# zr * zr on t6
+    mul $t7, $t5, $t5		# zi * zi on t7
+
+    addu $t8, $t6, $t7		# absz = zr² + i² on t8
+    addiu $t8, $t8, -4		# absz - 4 on t8 
+    bgtz $t8, write_shade	# if (absz - 4 > 0) write_shade
+    
+    #### TODO
+    # sr = zr*zr - zi*zi + cpr
+    # si = 2 * zr * zi + cpi
+    push $t4 # push zr
+    push $t5 # push zi
+    subu $t4, $t6, $t7 # zr**2 - zi**2 in t4 (sr)
+    # addu $t4, CPR # cpr esta perdido en el stack
+    pop $t5 # pop zi on t5
+    pop $t6 # pop zr on t6
+    mul $t7, $t5, $t6 # (zr * zi)
+    add $t7, $t7, $t7 # 2 * (zr*zi) 
+    # addu $t7, $t7, CPI # idem cpr 
+
+    # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
+    # respectivamente
+    move $t4, $t4 	# zr = sr
+    move $t5, $t7   # zi = si
+    ####
 
     addi $t9, $t9, 1		# ++c
     j shades_loop
 
     ###############################################################
 
-write:
-    ###############################################################
-    # Write "c\n"
+write_shade:
+    # Shades are being calculated in t9. So we have to write the t9 color value
+    # Appending in buffer color\n
+    write_buffer $t9, 4
+    lw $t6, line_break
+    write_buffer $t6, 1
 
-    sw $t9, 36($fp)	# store c on mem(fp + 36)
-
-    # Write c
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, 40($t0)	# address of buffer from which to write
-    li $a2, 36($fp)	# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-
-    # Write "\n"
-    li $v0, 15		# system call for write to file
-    move $a0, $t3	# file descriptor
-    la $a1, line_break	# address of buffer from which to write
-    li $a2, 1		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
-    ###############################################################
+    #### Restore state
+    lw $t4, 32($fp)
+    lw $t5, 4($fp)
+    lw $t7, 28($fp)
+    lw $t8, 0($fp)
+    ####
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x
@@ -182,22 +198,16 @@ UL_im_icr:
     subu $t5, $t5, $t6		# ci -= parms->d_im
     j UL_im_loop
 
-    ###############################################################
-
-flush:
-    #TODO
+fflush:
+    bgt $t2, 0, flush_buffer
     j success
 
 io_error:
-
-    ###############################################################
-    # Write "i/o error.\n" on stderr
-    li $v0, 15		# system call for write to file
-    li $a0, 2		# file descriptor
-    la $a1, error_msg	# address of buffer from which to write
-    li $a2, 11		# buffer length
-    syscall		# write to file
-    ###############################################################
+    li $v0, 15
+    move $a0, 2
+    la $a1, error_msg
+    li $a2, 11
+    syscall
 
     li $v0, -1	# return value -1
     j return
@@ -206,7 +216,6 @@ success:
     li $v0, 0	# return value 0
 
 return:
-
     ###############################################################
     # Pop stack frame
     lw $fp, 60($sp)	# loads mem(sp + 60) on fp

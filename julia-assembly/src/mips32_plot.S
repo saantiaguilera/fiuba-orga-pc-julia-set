@@ -21,6 +21,7 @@ buffer_ini:
     .abicalls
     .global mips32_plot
     .ent mips32_plot
+
 .macro push (%arg)
     addi $sp, $sp, -4
     sw %arg, 0($sp)
@@ -34,7 +35,7 @@ buffer_ini:
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
     li $v0, 15		# system call for write to file
-    move $a0, $fd 	# file descriptor
+    move $a0, %fd 	# file descriptor
     la $a1, $t1		# address of buffer from which to write
     li $a2, $t2		# buffer length
     syscall		# write to file
@@ -43,20 +44,17 @@ buffer_ini:
 
 # Going to need a register to store the buff location
 .macro write_buffer (%data, %len)
-    bgt $t2, BUF_SZ, flush_buffer # Store sp location in stack or somewhere so write can jump back
-    sw $data, 0($t1)
-    li $t1, $len
-    addi $t2, $t2, $len
+    blt $t2, BUF_SZ, not_flush_buffer # Store sp location in stack or somewhere so write can jump back
+    write_file $t3
+	empty_buffer
+    not_flush_buffer: sw %data, 0($t1)
+    li $t1, %len
+    addi $t2, $t2, %len
 .end_macro
 
 .macro empty_buffer
     lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
-
-flush_buffer:
-    write_file $t3
-	empty_buffer
-    # j line 37
 
 mips32_plot:
     ###############################################################

@@ -44,7 +44,7 @@ buffer_ini:
 
 # Going to need a register to store the buff location
 .macro write_buffer (%data, %len)
-    blt $t2, BUF_SZ, not_flush_buffer # Store sp location in stack or somewhere so write can jump back
+    blt $t2, BUF_SZ, not_flush_buffer
     write_file $t3
 	empty_buffer
     not_flush_buffer: sw %data, 0($t1)

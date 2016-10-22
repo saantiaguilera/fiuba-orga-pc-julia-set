@@ -3,9 +3,10 @@
 
 #define BUF_SZ 8192
 
-#define STACK_SZ 64
+#define STACK_SZ 72
 
-#define A0_OFFSET 64
+#define A0_OFFSET 72
+#define RA_OFFSET 64
 #define FP_OFFSET 60
 #define GP_OFFSET 56
 #define CPI_OFFSET 48

@@ -35,18 +35,6 @@
 #define PARAM_SHADES 40
 #define PARAM_FD 44
 
-	.data
-header: 
-	.asciiz "P2\n"
-line_break:
-	.ascii "\n"
-error_msg:
-	.asciiz "i/o error.\n"
-
-    .align 2 # We will be storing words in the buffer, and .text should have it too.
-buffer_ini:
-    .space BUF_SZ
-
 .macro empty_buffer
     lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
@@ -71,8 +59,9 @@ buffer_ini:
     addi $t2, $t2, %len
 .end_macro
 
-    .abicalls
     .text
+    .abicalls
+    .align 2
     .globl mips32_plot
     .ent mips32_plot
 
@@ -249,3 +238,15 @@ return:
     jr $ra
     
 	.end mips32_plot
+
+	.rdata
+    .align 2
+header: 
+	.asciiz "P2\n"
+line_break:
+	.ascii "\n"
+error_msg:
+	.asciiz "i/o error.\n"
+
+buffer_ini:
+    .space BUF_SZ

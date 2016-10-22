@@ -35,6 +35,8 @@
 #define PARAM_SHADES 40
 #define PARAM_FD 44
 
+    .text
+
 .macro empty_buffer
     lw t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
@@ -59,17 +61,17 @@
     addi t2, t2, %len
 .end_macro
 
-    .text
     .abicalls
     .align 2
     .globl mips32_plot
     .ent mips32_plot
 
+
 mips32_plot:
     ###############################################################
     # Push stack frame
     subu sp, sp, STACK_SZ	# push stack pointer down
-    sw $$fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
+    sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
     move $fp, sp		# $fp = sp
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
@@ -215,7 +217,7 @@ fflush:
 
 io_error:
     li v0, 15
-    move a0, 2 #TODO stderr tiene fd 2 ????
+    li a0, 2 #TODO stderr tiene fd 2 ????
     la a1, error_msg
     li a2, 11
     syscall

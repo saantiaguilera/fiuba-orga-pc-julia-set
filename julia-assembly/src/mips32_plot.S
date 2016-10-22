@@ -41,7 +41,7 @@
 
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
-    li v0, 15			# system call for write to file
+    li v0, SYS_write	# system call for write to file
     move a0, %fd 		# file descriptor
     la a1, t1			# address of buffer from which to write
     li a2, t2			# buffer length
@@ -214,7 +214,7 @@ fflush:
     j success
 
 io_error:
-    li v0, 15
+    li v0, SYS_write
     move a0, 2 #TODO stderr tiene fd 2 ????
     la a1, error_msg
     li a2, 11

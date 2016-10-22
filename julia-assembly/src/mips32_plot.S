@@ -47,30 +47,6 @@
 
     .text
 
-.macro empty_buffer
-    lw t1, buffer_ini # TODO esta chequeado ese label en el lw??
-.end_macro
-
-# Buffer stored in t1 / Buffer length in t2
-.macro write_file (%fd)
-    li v0, SYS_write	# system call for write to file
-    move a0, %fd 		# file descriptor
-    la a1, t1			# address of buffer from which to write
-    li a2, t2			# buffer length
-    syscall			# write to file
-    bltz v0, io_error		# if v0 < 0, io error
-.end_macro
-
-# Going to need a register to store the buff location
-.macro write_buffer (%data, %len)
-    blt t2, BUF_SZ, not_flush_buffer
-    write_file t3
-	empty_buffer
-    not_flush_buffer: sw %data, 0(t1)
-    li t1, %len
-    addi t2, t2, %len
-.end_macro
-
     .abicalls
     .align 2
     .globl mips32_plot
@@ -266,6 +242,18 @@ write_file:
     ###############################################################
 
     #### TODO
+write_buffer: # (%data, %len, %fd)
+    blt t2, BUF_SZ, not_flush_buffer
+    li v0, SYS_write	# system call for write to file
+    move a0, %fd 		# file descriptor
+    la a1, t1			# address of buffer from which to write
+    li a2, t2			# buffer length
+    syscall			# write to file
+    bltz v0, io_error		# if v0 < 0, io error
+    lw t1, buffer_ini # TODO esta chequeado ese label en el lw??
+    not_flush_buffer: sw %data, 0(t1)
+    li t1, %len
+    addi t2, t2, %len
 
     ###############################################################
     # Pop stack frame

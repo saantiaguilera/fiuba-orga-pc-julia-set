@@ -52,16 +52,6 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
-.macro push (%arg)
-    addi $sp, $sp, -4
-    sw %arg, 0($sp)
-.end_macro
-
-.macro pop (%reg) # %reg its a register that will hold the popped value
-    lw %reg, 0($sp)
-    addi $sp, $sp, 4
-.end_macro
-
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
     li $v0, 15		# system call for write to file
@@ -181,12 +171,12 @@ shades_loop:
     #### TODO
     # sr = zr*zr - zi*zi + cpr
     # si = 2 * zr * zi + cpi
-    push $t4			# push zr
-    push $t5			# push zi
+    sw $t4, ZR_OFFSET($fp)
+    sw $t5, ZI_OFFSET($fp)
     subu $t4, $t6, $t7		# zr**2 - zi**2 in t4 (sr)
     # addu $t4, CPR # cpr esta perdido en el stack
-    pop $t5			# pop zi on t5
-    pop $t6			# pop zr on t6
+    lw $t5, ZI_OFFSET($fp)
+    lw $t6, ZR_OFFSET($fp)
     mul $t7, $t5, $t6		# (zr * zi)
     add $t7, $t7, $t7		# 2 * (zr*zi) 
     # addu $t7, $t7, CPI # idem cpr 

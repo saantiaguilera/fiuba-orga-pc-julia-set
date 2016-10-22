@@ -22,6 +22,19 @@
 #define CI_OFFSET 4
 #define CR_OFFSET 0
 
+#define PARAM_UL_RE 0
+#define PARAM_UL_IM 4
+#define PARAM_LR_RE 8
+#define PARAM_LR_IM 12
+#define PARAM_D_RE 16
+#define PARAM_D_IM 20
+#define PARAM_CP_RE 24
+#define PARAM_CP_IM 28
+#define PARAM_X_RES 32
+#define PARAM_Y_RES 36
+#define PARAM_SHADES 40
+#define PARAM_FD 44
+
 	.data
 header: 
 	.asciiz "P2\n"
@@ -85,14 +98,14 @@ mips32_plot:
 
     move $t0, $a0	# params on t0
 
-    lw $t1, 24($t0)	# cpr = params->cp_re on t1
+    lw $t1, PARAM_CP_RE($t0)	# cpr = params->cp_re on t1
     sw $t1, CPR_OFFSET($fp)	# store cpr on mem(fp + CPR_OFFSET)
-    lw $t2, 28($t0)	# cpi = params->cp_im on t2
+    lw $t2, PARAM_CP_IM($t0)	# cpi = params->cp_im on t2
     sw $t2, CPI_OFFSET($fp)	# store cpi on mem(fp + CPI_OFFSET)
 
     #### Hace falta abrir el fd? ####
 
-    lw $t3, 44($t0)	# params->fd on t3
+    lw $t3, PARAM_FD($t0)	# params->fd on t3
     
     #### Inicializamos el buffer ####
 
@@ -104,17 +117,17 @@ mips32_plot:
     lw $t4, (header)
     write_buffer $t4 3
 
-    lw $t4, 32($t0)
+    lw $t4, PARAM_X_RES($t0)
     write_buffer $t4, 8
     lw $t4, line_break
     write_buffer $t4, 1
     
-    lw $t4, 36($t0)
+    lw $t4, PARAM_Y_RES($t0)
     write_buffer $t4, 8
     lw $t4, line_break
     write_buffer $t4, 1
 	
-    lw $t4, 40($t0)
+    lw $t4, PARAM_SHADES($t0)
     write_buffer $t4, 8
     lw $t4, line_break
     write_buffer $t4, 1
@@ -127,15 +140,15 @@ mips32_plot:
     # El parámetro de iteración es el punto (cr, ci).
 
     li $t4, 0			# y = 0 on t4
-    lw $t5, 4($t0)		# ci = parms->UL_im on t5
+    lw $t5, PARAM_UL_IM($t0)		# ci = parms->UL_im on t5
 UL_im_loop:
-    lw $t6, 36($t0)		# parms->y_res on t6
+    lw $t6, PARAM_Y_RES($t0)		# parms->y_res on t6
     beq $t4, $t6, fflush	# if (y < parms->y_res) continue
 
     li $t7, 0			# x = 0 on t7
-    lw $t8, 0($t0)		# cr = parms->UL_re on t8
+    lw $t8, PARAM_UL_RE($t0)		# cr = parms->UL_re on t8
 UL_re_loop:
-    lw $t6, 32($t0)		# parms->x_res on t6
+    lw $t6, PARAM_X_RES($t0)		# parms->x_res on t6
     beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 
     #### Save state in stack
@@ -155,7 +168,7 @@ UL_re_loop:
 
     li $t9, 0			# c = 0 on t9
 shades_loop:
-    lw $t6, 40($t0)		# parms->shades on t6
+    lw $t6, PARAM_SHADES($t0)		# parms->shades on t6
     beq $t9, $t6, write_shade	# if (c < parms->shades) continue
 
     mul $t6, $t4, $t4		# zr * zr on t6
@@ -205,13 +218,13 @@ write_shade:
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x
-    lw $t6, 16($t0)		# parms->d_re on t6
+    lw $t6, PARAM_D_RE($t0)		# parms->d_re on t6
     add $t8, $t8, $t6		# cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
     addi $t4, $t4, 1 		# ++y
-    lw $t6, 20($t0)		# parms->d_im on t6
+    lw $t6, PARAM_D_IM($t0)		# parms->d_im on t6
     subu $t5, $t5, $t6		# ci -= parms->d_im
     j UL_im_loop
 

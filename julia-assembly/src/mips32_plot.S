@@ -47,11 +47,6 @@ error_msg:
 buffer_ini:
     .space BUF_SZ
 
-    .text
-    .abicalls
-    .global mips32_plot
-    .ent mips32_plot
-
 .macro empty_buffer
     lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
@@ -75,6 +70,11 @@ buffer_ini:
     li $t1, %len
     addi $t2, $t2, %len
 .end_macro
+
+    .abicalls
+    .text
+    .globl mips32_plot
+    .ent mips32_plot
 
 mips32_plot:
     ###############################################################
@@ -247,4 +247,5 @@ return:
     ###############################################################
 
     jr $ra
+    
 	.end mips32_plot

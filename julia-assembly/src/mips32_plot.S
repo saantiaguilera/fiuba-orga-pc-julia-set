@@ -77,11 +77,13 @@ mips32_plot:
     
     #### Inicializamos el buffer ####
 
-    empty_buffer
+    # empty_buffer TODO inicialize buffer someway?
+    lw t1, buffer_ini # <- asi?
 
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
 
+    lw a0, (header)
     lw t4, (header)
     write_buffer t4 3
 
@@ -229,7 +231,7 @@ return:
     
 	.end mips32_plot
 
-write_file:
+write_file: # (%data, %len, %fd, %actual_buff_address)
     ###############################################################
     # Push stack frame
     subu sp, sp, WRITE_STACK_SZ	# push stack pointer down
@@ -241,8 +243,7 @@ write_file:
     sw a2, WRITE_A2_OFFSET($fp)	# store params on mem($fp + A2_OFFSET) (callee's stack frame)
     ###############################################################
 
-    #### TODO
-write_buffer: # (%data, %len, %fd)
+    # TODO change temporal regs and use a* registers
     blt t2, BUF_SZ, not_flush_buffer
     li v0, SYS_write	# system call for write to file
     move a0, %fd 		# file descriptor
@@ -250,7 +251,7 @@ write_buffer: # (%data, %len, %fd)
     li a2, t2			# buffer length
     syscall			# write to file
     bltz v0, io_error		# if v0 < 0, io error
-    lw t1, buffer_ini # TODO esta chequeado ese label en el lw??
+    la t1, buffer_ini # TODO esta chequeado ese label en el lw??
     not_flush_buffer: sw %data, 0(t1)
     li t1, %len
     addi t2, t2, %len

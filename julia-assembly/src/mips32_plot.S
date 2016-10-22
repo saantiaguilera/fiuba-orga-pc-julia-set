@@ -1,9 +1,26 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
-#ifndef BUF_SZ
 #define BUF_SZ 8192
-#endif
+
+#define STACK_SZ 64
+
+#define A0_OFFSET 64
+#define FP_OFFSET 60
+#define GP_OFFSET 56
+#define CPI_OFFSET 48
+#define CPR_OFFSET 44
+#define RES_OFFSET 40
+#define C_OFFSET 36
+#define Y_OFFSET 32
+#define X_OFFSET 28
+#define ABS_OFFSET 24
+#define SI_OFFSET 20
+#define SR_OFFSET 16
+#define ZI_OFFSET 12
+#define ZR_OFFSET 8
+#define CI_OFFSET 4
+#define CR_OFFSET 0
 
 	.data
 header: 
@@ -59,19 +76,19 @@ buffer_ini:
 mips32_plot:
     ###############################################################
     # Push stack frame
-    subu $sp, $sp, 64	# push stack pointer down
-    sw $fp, 60($sp)	# store fp on mem(sp + 60)
-    sw $gp, 56($sp)	# store gp on mem(sp + 56)
+    subu $sp, $sp, STACK_SZ	# push stack pointer down
+    sw $fp, FP_OFFSET($sp)	# store fp on mem(sp + FP_OFFSET)
+    sw $gp, GP_OFFSET($sp)	# store gp on mem(sp + GP_OFFSET)
     move $fp, $sp	# fp = sp
-    sw $a0, 64($fp)	# store params on mem(fp + 64) (callee's stack frame)
+    sw $a0, A0_OFFSET($fp)	# store params on mem(fp + A0_OFFSET) (callee's stack frame)
     ###############################################################
 
     move $t0, $a0	# params on t0
 
     lw $t1, 24($t0)	# cpr = params->cp_re on t1
-    sw $t1, 44($fp)	# store cpr on mem(fp + 44)
+    sw $t1, CPR_OFFSET($fp)	# store cpr on mem(fp + CPR_OFFSET)
     lw $t2, 28($t0)	# cpi = params->cp_im on t2
-    sw $t2, 48($fp)	# store cpi on mem(fp + 48)
+    sw $t2, CPI_OFFSET($fp)	# store cpi on mem(fp + CPI_OFFSET)
 
     #### Hace falta abrir el fd? ####
 
@@ -122,10 +139,10 @@ UL_re_loop:
     beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 
     #### Save state in stack
-    sw $t4, 32($fp)		# store y on mem(fp + 32)
-    sw $t5, 4($fp)		# store ci on mem(fp + 4)
-    sw $t7, 28($fp)		# store x on mem(fp + 28)
-    sw $t8, 0($fp)		# store cr on mem(fp)
+    sw $t4, Y_OFFSET($fp)		# store y on mem(fp + Y_OFFSET)
+    sw $t5, CI_OFFSET($fp)		# store ci on mem(fp + CI_OFFSET)
+    sw $t7, X_OFFSET($fp)		# store x on mem(fp + X_OFFSET)
+    sw $t8, CR_OFFSET($fp)		# store cr on mem(fp)
     ####
 
     move $t4, $t8		# zr = cr on t4
@@ -144,7 +161,7 @@ shades_loop:
     mul $t6, $t4, $t4		# zr * zr on t6
     mul $t7, $t5, $t5		# zi * zi on t7
 
-    addu $t8, $t6, $t7		# absz = zr² + i² on t8
+    addu $t8, $t6, $t7		# absz = zr² + zi² on t8
     addiu $t8, $t8, -4		# absz - 4 on t8 
     bgtz $t8, write_shade	# if (absz - 4 > 0) write_shade
     
@@ -180,10 +197,10 @@ write_shade:
     write_buffer $t6, 1
 
     #### Restore state
-    lw $t4, 32($fp)
-    lw $t5, 4($fp)
-    lw $t7, 28($fp)
-    lw $t8, 0($fp)
+    lw $t4, Y_OFFSET($fp)
+    lw $t5, CI_OFFSET($fp)
+    lw $t7, X_OFFSET($fp)
+    lw $t8, CR_OFFSET($fp)
     ####
 
 UL_re_icr:
@@ -218,11 +235,12 @@ success:
 return:
     ###############################################################
     # Pop stack frame
-    lw $fp, 60($sp)	# loads mem(sp + 60) on fp
-    lw $gp, 56($sp)	# loads mem(sp + 56) on gp
-    addiu $sp, $sp, 64	# pop stack pointer up
+    lw $fp, FP_OFFSET($sp)	# loads mem(sp + FP_OFFSET) on fp
+    lw $gp, GP_OFFSET($sp)	# loads mem(sp + GP_OFFSET) on gp
+    addiu $sp, $sp, STACK_SZ	# pop stack pointer up
     ###############################################################
 
     jr $ra
 
 .end
+

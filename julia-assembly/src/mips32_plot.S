@@ -74,7 +74,8 @@ mips32_plot:
     subu sp, sp, STACK_SZ	# push stack pointer down
     sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
-    move $fp, sp		# $fp = sp
+    sw ra, RA_OFFSET(sp)	# store ra on mem(sp + RA_OFFSET)
+    move $fp, sp			# $fp = sp
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
     ###############################################################
 
@@ -235,12 +236,17 @@ return:
     move sp, $fp
     lw $fp, FP_OFFSET(sp)	# loads mem(sp + FP_OFFSET) on $fp
     lw gp, GP_OFFSET(sp)	# loads mem(sp + GP_OFFSET) on gp
+    lw ra, RA_OFFSET(sp)	# loads mem(sp + RA_OFFSET) on gp
     addiu sp, sp, STACK_SZ	# pop stack pointer up
     ###############################################################
 
     jr ra
     
 	.end mips32_plot
+
+write_file:
+	#### TODO
+	.end write_file
 
 	.rdata
     .align 2

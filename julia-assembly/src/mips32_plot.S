@@ -36,7 +36,7 @@
 #define PARAM_SHADES 40
 #define PARAM_FD 44
 
-#define WRITE_STACK_SZ 72
+#define WRITE_STACK_SZ 8
 
 #define WRITE_A3_OFFSET 20
 #define WRITE_A2_OFFSET 16
@@ -254,7 +254,29 @@ return:
 	.end mips32_plot
 
 write_file:
-	#### TODO
+    ###############################################################
+    # Push stack frame
+    subu sp, sp, WRITE_STACK_SZ	# push stack pointer down
+    sw $fp, WRITE_FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
+    sw gp, WRITE_GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
+    move $fp, sp				# $fp = sp
+    sw a0, WRITE_A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
+    sw a1, WRITE_A1_OFFSET($fp)	# store params on mem($fp + A1_OFFSET) (callee's stack frame)
+    sw a2, WRITE_A2_OFFSET($fp)	# store params on mem($fp + A2_OFFSET) (callee's stack frame)
+    ###############################################################
+
+    #### TODO
+
+    ###############################################################
+    # Pop stack frame
+    move sp, $fp
+    lw $fp, WRITE_FP_OFFSET(sp)		# loads mem(sp + FP_OFFSET) on $fp
+    lw gp, WRITE_GP_OFFSET(sp)		# loads mem(sp + GP_OFFSET) on gp
+    addiu sp, sp, WRITE_STACK_SZ	# pop stack pointer up
+    ###############################################################
+
+    jr ra
+    
 	.end write_file
 
 	.rdata

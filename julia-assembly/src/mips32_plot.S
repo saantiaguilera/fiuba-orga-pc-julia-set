@@ -52,6 +52,10 @@ buffer_ini:
     .global mips32_plot
     .ent mips32_plot
 
+.macro empty_buffer
+    lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
+.end_macro
+
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
     li $v0, 15		# system call for write to file
@@ -70,10 +74,6 @@ buffer_ini:
     not_flush_buffer: sw %data, 0($t1)
     li $t1, %len
     addi $t2, $t2, %len
-.end_macro
-
-.macro empty_buffer
-    lw $t1, buffer_ini # TODO esta chequeado ese label en el lw??
 .end_macro
 
 mips32_plot:
@@ -246,6 +246,4 @@ return:
     ###############################################################
 
     jr $ra
-
-.end
-
+	.end mips32_plot

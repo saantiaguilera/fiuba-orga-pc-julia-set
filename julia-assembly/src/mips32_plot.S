@@ -64,12 +64,12 @@ buffer_ini:
 
 # Buffer stored in t1 / Buffer length in t2
 .macro write_file (%fd)
-    li $v0, 15		# system call for write to file
-    move $a0, %fd 	# file descriptor
-    la $a1, $t1		# address of buffer from which to write
-    li $a2, $t2		# buffer length
-    syscall		# write to file
-    bltz $v0, io_error	# if v0 < 0, io error
+    li $v0, 15			# system call for write to file
+    move $a0, %fd 		# file descriptor
+    la $a1, $t1			# address of buffer from which to write
+    li $a2, $t2			# buffer length
+    syscall			# write to file
+    bltz $v0, io_error		# if v0 < 0, io error
 .end_macro
 
 # Going to need a register to store the buff location
@@ -234,7 +234,7 @@ fflush:
 
 io_error:
     li $v0, 15
-    move $a0, 2 #TODO stderr tiene fd 2 Â?
+    move $a0, 2 #TODO stderr tiene fd 2 ????
     la $a1, error_msg
     li $a2, 11
     syscall
@@ -248,6 +248,7 @@ success:
 return:
     ###############################################################
     # Pop stack frame
+    move $sp, $fp
     lw $fp, FP_OFFSET($sp)	# loads mem(sp + FP_OFFSET) on fp
     lw $gp, GP_OFFSET($sp)	# loads mem(sp + GP_OFFSET) on gp
     addiu $sp, $sp, STACK_SZ	# pop stack pointer up

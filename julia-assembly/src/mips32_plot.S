@@ -92,11 +92,11 @@ mips32_plot:
     subu $sp, $sp, STACK_SZ	# push stack pointer down
     sw $fp, FP_OFFSET($sp)	# store fp on mem(sp + FP_OFFSET)
     sw $gp, GP_OFFSET($sp)	# store gp on mem(sp + GP_OFFSET)
-    move $fp, $sp	# fp = sp
+    move $fp, $sp		# fp = sp
     sw $a0, A0_OFFSET($fp)	# store params on mem(fp + A0_OFFSET) (callee's stack frame)
     ###############################################################
 
-    move $t0, $a0	# params on t0
+    move $t0, $a0		# params on t0
 
     lw $t1, PARAM_CP_RE($t0)	# cpr = params->cp_re on t1
     sw $t1, CPR_OFFSET($fp)	# store cpr on mem(fp + CPR_OFFSET)
@@ -140,22 +140,22 @@ mips32_plot:
     # El parámetro de iteración es el punto (cr, ci).
 
     li $t4, 0			# y = 0 on t4
-    lw $t5, PARAM_UL_IM($t0)		# ci = parms->UL_im on t5
+    lw $t5, PARAM_UL_IM($t0)	# ci = parms->UL_im on t5
 UL_im_loop:
-    lw $t6, PARAM_Y_RES($t0)		# parms->y_res on t6
+    lw $t6, PARAM_Y_RES($t0)	# parms->y_res on t6
     beq $t4, $t6, fflush	# if (y < parms->y_res) continue
 
     li $t7, 0			# x = 0 on t7
-    lw $t8, PARAM_UL_RE($t0)		# cr = parms->UL_re on t8
+    lw $t8, PARAM_UL_RE($t0)	# cr = parms->UL_re on t8
 UL_re_loop:
-    lw $t6, PARAM_X_RES($t0)		# parms->x_res on t6
+    lw $t6, PARAM_X_RES($t0)	# parms->x_res on t6
     beq $t7, $t6, UL_im_icr	# if (x < parms->x_res) continue
 
     #### Save state in stack
-    sw $t4, Y_OFFSET($fp)		# store y on mem(fp + Y_OFFSET)
-    sw $t5, CI_OFFSET($fp)		# store ci on mem(fp + CI_OFFSET)
-    sw $t7, X_OFFSET($fp)		# store x on mem(fp + X_OFFSET)
-    sw $t8, CR_OFFSET($fp)		# store cr on mem(fp)
+    sw $t4, Y_OFFSET($fp)	# store y on mem(fp + Y_OFFSET)
+    sw $t5, CI_OFFSET($fp)	# store ci on mem(fp + CI_OFFSET)
+    sw $t7, X_OFFSET($fp)	# store x on mem(fp + X_OFFSET)
+    sw $t8, CR_OFFSET($fp)	# store cr on mem(fp)
     ####
 
     move $t4, $t8		# zr = cr on t4
@@ -168,7 +168,7 @@ UL_re_loop:
 
     li $t9, 0			# c = 0 on t9
 shades_loop:
-    lw $t6, PARAM_SHADES($t0)		# parms->shades on t6
+    lw $t6, PARAM_SHADES($t0)	# parms->shades on t6
     beq $t9, $t6, write_shade	# if (c < parms->shades) continue
 
     mul $t6, $t4, $t4		# zr * zr on t6
@@ -181,20 +181,20 @@ shades_loop:
     #### TODO
     # sr = zr*zr - zi*zi + cpr
     # si = 2 * zr * zi + cpi
-    push $t4 # push zr
-    push $t5 # push zi
-    subu $t4, $t6, $t7 # zr**2 - zi**2 in t4 (sr)
+    push $t4			# push zr
+    push $t5			# push zi
+    subu $t4, $t6, $t7		# zr**2 - zi**2 in t4 (sr)
     # addu $t4, CPR # cpr esta perdido en el stack
-    pop $t5 # pop zi on t5
-    pop $t6 # pop zr on t6
-    mul $t7, $t5, $t6 # (zr * zi)
-    add $t7, $t7, $t7 # 2 * (zr*zi) 
+    pop $t5			# pop zi on t5
+    pop $t6			# pop zr on t6
+    mul $t7, $t5, $t6		# (zr * zi)
+    add $t7, $t7, $t7		# 2 * (zr*zi) 
     # addu $t7, $t7, CPI # idem cpr 
 
     # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
     # respectivamente
-    move $t4, $t4 	# zr = sr
-    move $t5, $t7   # zi = si
+    move $t4, $t4		# zr = sr
+    move $t5, $t7		# zi = si
     ####
 
     addi $t9, $t9, 1		# ++c
@@ -218,13 +218,13 @@ write_shade:
 
 UL_re_icr:
     addi $t7, $t7, 1 		# ++x
-    lw $t6, PARAM_D_RE($t0)		# parms->d_re on t6
+    lw $t6, PARAM_D_RE($t0)	# parms->d_re on t6
     add $t8, $t8, $t6		# cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
     addi $t4, $t4, 1 		# ++y
-    lw $t6, PARAM_D_IM($t0)		# parms->d_im on t6
+    lw $t6, PARAM_D_IM($t0)	# parms->d_im on t6
     subu $t5, $t5, $t6		# ci -= parms->d_im
     j UL_im_loop
 
@@ -234,16 +234,16 @@ fflush:
 
 io_error:
     li $v0, 15
-    move $a0, 2
+    move $a0, 2 #TODO stderr tiene fd 2 �?
     la $a1, error_msg
     li $a2, 11
     syscall
 
-    li $v0, -1	# return value -1
+    li $v0, -1			# return value -1
     j return
 
 success:
-    li $v0, 0	# return value 0
+    li $v0, 0			# return value 0
 
 return:
     ###############################################################

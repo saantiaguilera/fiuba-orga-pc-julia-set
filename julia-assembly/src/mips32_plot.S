@@ -174,12 +174,14 @@ shades_loop:
     sw $t4, ZR_OFFSET($fp)
     sw $t5, ZI_OFFSET($fp)
     subu $t4, $t6, $t7		# zr**2 - zi**2 in t4 (sr)
-    # addu $t4, CPR # cpr esta perdido en el stack
+    lw $t5, CPR_OFFSET($fp)
+    addu $t4, $t4, $t5      # (zr*zr-zi*zi) + cpr
     lw $t5, ZI_OFFSET($fp)
     lw $t6, ZR_OFFSET($fp)
     mul $t7, $t5, $t6		# (zr * zi)
     add $t7, $t7, $t7		# 2 * (zr*zi) 
-    # addu $t7, $t7, CPI # idem cpr 
+    lw $t4, CPI_OFFSET($fp)
+    addu $t7, $t7, $t4      # (2*zr*zi) + cpi 
 
     # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
     # respectivamente

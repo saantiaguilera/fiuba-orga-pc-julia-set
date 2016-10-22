@@ -36,6 +36,15 @@
 #define PARAM_SHADES 40
 #define PARAM_FD 44
 
+#define WRITE_STACK_SZ 72
+
+#define WRITE_A3_OFFSET 20
+#define WRITE_A2_OFFSET 16
+#define WRITE_A1_OFFSET 12
+#define WRITE_A0_OFFSET 8
+#define WRITE_FP_OFFSET 4
+#define WRITE_GP_OFFSET 0
+
     .text
 
 .macro empty_buffer

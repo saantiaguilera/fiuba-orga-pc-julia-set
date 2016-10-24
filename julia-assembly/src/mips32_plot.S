@@ -3,11 +3,15 @@
 
 #define BUF_SZ 8192
 
-#define STACK_SZ 64
+#define STACK_SZ 76
 
-#define A0_OFFSET 64
-#define FP_OFFSET 60
-#define GP_OFFSET 56
+#define A0_OFFSET 80
+#define FP_OFFSET 76
+#define GP_OFFSET 72
+#define DATA_OFFSET 68
+#define DATA_LEN_OFFSET 64
+#define BUFF_ADDR_OFFSET 60
+#define BUFF_LEN_OFFSET 56
 #define IP_OFFSET 52
 #define CPI_OFFSET 48
 #define CPR_OFFSET 44
@@ -210,8 +214,8 @@ write_file:
     li v0, SYS_write	    # system call for write to file
     lw a0, PARAM_FD($fp) 	# file descriptor
     # Creo que deberia ser el inicio del buffer siempre lw a1, buffer_ini
-    lw a1, BUFF_ADDR($fp)	# address of buffer from which to write
-    lw a2, BUFF_LEN($fp)	# buffer length, alt move a2, t1
+    lw a1, BUFF_ADDR_OFFSET($fp)	# address of buffer from which to write
+    lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
     syscall				    # write to file
     bltz v0, io_error	    # if v0 < 0, io error
     la t0, buffer_ini       # reset buffer
@@ -222,8 +226,8 @@ not_flush_buffer:
     lw t0, BUFF_ADDR($fp)
     lw t1, BUFF_LEN($fp)
     # Going to need space in stack for data and len
-    lw t2, DATA($fp)
-    lw t3, DATA_LEN($fp)
+    lw t2, DATA_OFFSET($fp)
+    lw t3, DATA_LEN_OFFSET($fp)
     sw t2, 0(t0) # store data in buff_addr
     add t0, t0, t3 # buff_addr + data_len
     sw t0, BUFF_ADDR($fp)

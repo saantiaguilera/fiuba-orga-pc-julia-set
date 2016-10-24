@@ -204,14 +204,31 @@ fflush:
     j success
 
 write_file:
-	# Buffer stored in t1 / Buffer length in t2
-    li v0, SYS_write	# system call for write to file
-    move a0, %fd 		# file descriptor
-    la a1, t1			# address of buffer from which to write
-    li a2, t2			# buffer length
-    syscall				# write to file
-    bltz v0, io_error	# if v0 < 0, io error
-    
+    lw t1, BUFF_LEN($fp)
+    blt t1, BUF_SZ, not_flush_buffer
+	# Buffer stored in t0 / Buffer length in t1
+    li v0, SYS_write	    # system call for write to file
+    lw a0, PARAM_FD($fp) 	# file descriptor
+    # Creo que deberia ser el inicio del buffer siempre lw a1, buffer_ini
+    lw a1, BUFF_ADDR($fp)	# address of buffer from which to write
+    lw a2, BUFF_LEN($fp)	# buffer length, alt move a2, t1
+    syscall				    # write to file
+    bltz v0, io_error	    # if v0 < 0, io error
+    la t0, buffer_ini       # reset buffer
+    li t1, 0
+    sw t0, BUFF_ADDR($fp)
+    sw t1, BUFF_LEN($fp)
+not_flush_buffer:
+    lw t0, BUFF_ADDR($fp)
+    lw t1, BUFF_LEN($fp)
+    # Going to need space in stack for data and len
+    lw t2, DATA($fp)
+    lw t3, DATA_LEN($fp)
+    sw t2, 0(t0) # store data in buff_addr
+    add t0, t0, t3 # buff_addr + data_len
+    sw t0, BUFF_ADDR($fp)
+    add t1, t1, t3
+    sw t1, BUFF_LEN($fp)
 	lw t6, IP_OFFSET($fp) # loads loads mem(sp + IP_OFFSET) on t6
 	jr t6
 

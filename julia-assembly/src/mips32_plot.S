@@ -97,7 +97,7 @@ mips32_plot:
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file
     
-    lw t0, A0_OFFSET(fp)
+    lw t0, A0_OFFSET($fp)
     addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
@@ -111,7 +111,7 @@ mips32_plot:
     jal write_file
     
     
-    lw t0, A0_OFFSET(fp)
+    lw t0, A0_OFFSET($fp)
     addu t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
@@ -232,7 +232,7 @@ UL_im_icr:
     j UL_im_loop
 
 fflush:
-    bgt t2, 0, flush_buffer
+#    bgt t2, 0, flush_buffer
     j success
 
 write_file:
@@ -251,7 +251,7 @@ write_file:
     sw t1, BUFF_LEN_OFFSET($fp)
 not_flush_buffer:
     lw t0, BUFF_LEN_OFFSET($fp)
-    add t1, t0, fp              # t0 = 0 (fp) + buff_len
+    add t1, t0, $fp              # t0 = 0 (fp) + buff_len
     #lw t1, BUFF_LEN_OFFSET($fp)
     lw t2, DATA_OFFSET($fp)
     lw t3, DATA_LEN_OFFSET($fp)
@@ -283,6 +283,7 @@ return:
     move sp, $fp
     lw $fp, FP_OFFSET(sp)	# loads mem(sp + FP_OFFSET) on $fp
     lw gp, GP_OFFSET(sp)	# loads mem(sp + GP_OFFSET) on gp
+    lw ra, IP_OFFSET(sp)
     addiu sp, sp, STACK_SZ	# pop stack pointer up
     ###############################################################
 

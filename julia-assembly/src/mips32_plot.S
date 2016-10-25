@@ -6,7 +6,7 @@
 
 #define STACK_SZ (76+BUF_SZ_B)
 
-#define A0_OFFSET BUF_SZ_B+80
+#define A0_OFFSET 2128
 #define FP_OFFSET BUF_SZ_B+76
 #define GP_OFFSET BUF_SZ_B+72
 #define DATA_OFFSET BUF_SZ_B+68
@@ -28,6 +28,8 @@
 #define CI_OFFSET BUF_SZ_B+4
 #define CR_OFFSET BUF_SZ_B
 #define BUFF_INIT 0
+
+#define SYS_write 15
 
 #define PARAM_UL_RE 0
 #define PARAM_UL_IM 4

@@ -46,7 +46,7 @@
 .macro write_buffer (%data, %len)
     blt t2, BUF_SZ, not_flush_buffer
     write_file t3
-	la t1, buffer_ini # TODO esta chequeado ese label en el la??
+    la t1, buffer_ini 
 not_flush_buffer:
     sw %data, 0(t1)
     li t1, %len
@@ -65,29 +65,25 @@ mips32_plot:
     subu sp, sp, STACK_SZ	# push stack pointer down
     sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
-    sw ra, IP_OFFSET(sp)    # store ra on mem(sp + IP_OFFSET)
+    sw ra, IP_OFFSET(sp)  	# store ra on mem(sp + IP_OFFSET)
     move $fp, sp		# $fp = sp
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
+    
+    lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t1
+    sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
+    sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
+    
+    la t0, buffer_ini
+    sw t0, BUFF_ADDR_OFFSET($fp)	# store buff_addr on mem($fp + BUFF_ADDR_OFFSET)
+    li t0, 0
+    sw t0, BUFF_LEN_OFFSET($fp)		# store buff_len on mem($fp + BUFF_LEN_OFFSET)
     ###############################################################
-
-    move t0, a0		# params on t0
-
-    lw t1, PARAM_CP_RE(t0)	# cpr = params->cp_re on t1
-    sw t1, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
-    lw t2, PARAM_CP_IM(t0)	# cpi = params->cp_im on t2
-    sw t2, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
-
+    
     #### Hace falta abrir el fd? ####
 
-    lw t3, PARAM_FD(t0)	# params->fd on t3
+    lw t3, PARAM_FD(a0)	# params->fd on t3
     
-    #### Inicializamos el buffer ####
-
-    la t0, buffer_ini
-    sw t0, BUFF_ADDR_OFFSET($fp)
-    li t0, 0
-    sw t0, BUFF_LEN_OFFSET($fp)
-
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
 

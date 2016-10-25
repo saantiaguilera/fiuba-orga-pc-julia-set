@@ -58,8 +58,9 @@ mips32_plot:
     sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
     sw ra, IP_OFFSET(sp)  	# store ra on mem(sp + IP_OFFSET)
-    move $fp, sp		# $fp = sp
-    sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
+    move $fp, sp		    # $fp = sp
+    sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) 
+                            # (callee's stack frame)
     
     lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t1
     sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
@@ -67,9 +68,11 @@ mips32_plot:
     sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
     
     li t0, BUFF_INIT
-    sw t0, BUFF_ADDR_OFFSET($fp)	# store buff_addr on mem($fp + BUFF_ADDR_OFFSET)
+    sw t0, BUFF_ADDR_OFFSET($fp)	# store buff_addr on 
+                                    # mem($fp + BUFF_ADDR_OFFSET)
     li t0, 0
-    sw t0, BUFF_LEN_OFFSET($fp)		# store buff_len on mem($fp + BUFF_LEN_OFFSET)
+    sw t0, BUFF_LEN_OFFSET($fp)		# store buff_len on 
+                                    # mem($fp + BUFF_LEN_OFFSET)
     ###############################################################
     
     #### Hace falta abrir el fd? ####
@@ -97,7 +100,7 @@ mips32_plot:
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file
     
-    lw t0, A0_OFFSET(fp)
+    lw t0, A0_OFFSET($fp)
     addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
@@ -109,9 +112,9 @@ mips32_plot:
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file
-     
-    lw t0, A0_OFFSET(fp)
-    addu t0, t0, PARAM_SHADES	# t0 = &shades 
+    
+	lw t0, A0_OFFSET($fp) 
+	addu t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
@@ -151,15 +154,15 @@ UL_re_loop:
     sw t8, CR_OFFSET($fp)	# store cr on mem($fp)
     ####
 
-    move t4, t8		# zr = cr on t4
-    move t5, t5		# zi = ci on t5
+    move t4, t8             # zr = cr on t4
+    move t5, t5             # zi = ci on t5
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
     # (cr, ci), usando la fórmula compleja recurrente 
     # f = f^3 + c.
 
-    li t9, 0			# c = 0 on t9
+    li t9, 0                # c = 0 on t9
 shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, write_shade	# if (c < parms->shades) continue
@@ -188,11 +191,11 @@ shades_loop:
 
     # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
     # respectivamente
-    move t4, t4		# zr = sr
-    move t5, t7		# zi = si
+    move t4, t4             # zr = sr
+    move t5, t7             # zi = si
     ####
 
-    addi t9, t9, 1		# ++c
+    addi t9, t9, 1          # ++c
     j shades_loop
 
     ###############################################################
@@ -219,15 +222,15 @@ write_shade:
     ####
 
 UL_re_icr:
-    addi t7, t7, 1 		# ++x
+    addi t7, t7, 1 		    # ++x
     lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
-    add t8, t8, t6		# cr += parms->d_re
+    add t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
-    addi t4, t4, 1 		# ++y
+    addi t4, t4, 1 		    # ++y
     lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
-    subu t5, t5, t6		# ci -= parms->d_im
+    subu t5, t5, t6		    # ci -= parms->d_im
     j UL_im_loop
 
 flush_end:
@@ -252,12 +255,12 @@ write_file:
     syscall				        # write to file
     bltz v0, io_error			# if v0 < 0, io error
     #li t0, BUFF_INIT      		# reset buffer
-    li t1, 0                   # reset buffer length
+    li t1, 0                    # reset buffer length
     #sw t0, BUFF_ADDR_OFFSET($fp)
     sw t1, BUFF_LEN_OFFSET($fp)
 not_flush_buffer:
     lw t0, BUFF_LEN_OFFSET($fp)
-    add t1, t0, fp              # t0 = 0 (fp) + buff_len
+    add t1, t0, $fp              # t0 = 0 (fp) + buff_len
     #lw t1, BUFF_LEN_OFFSET($fp)
     lw t2, DATA_OFFSET($fp)
     lw t3, DATA_LEN_OFFSET($fp)
@@ -289,6 +292,7 @@ return:
     move sp, $fp
     lw $fp, FP_OFFSET(sp)	# loads mem(sp + FP_OFFSET) on $fp
     lw gp, GP_OFFSET(sp)	# loads mem(sp + GP_OFFSET) on gp
+    lw ra, IP_OFFSET(sp)
     addiu sp, sp, STACK_SZ	# pop stack pointer up
     ###############################################################
 

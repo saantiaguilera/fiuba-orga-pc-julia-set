@@ -3,29 +3,30 @@
 
 #define BUF_SZ 8192
 
-#define STACK_SZ 76
+#define STACK_SZ (76+BUF_SZ/4)
 
-#define A0_OFFSET 80
-#define FP_OFFSET 76
-#define GP_OFFSET 72
-#define DATA_OFFSET 68
-#define DATA_LEN_OFFSET 64
-#define BUFF_ADDR_OFFSET 60
-#define BUFF_LEN_OFFSET 56
-#define IP_OFFSET 52
-#define CPI_OFFSET 48
-#define CPR_OFFSET 44
-#define RES_OFFSET 40
-#define C_OFFSET 36
-#define Y_OFFSET 32
-#define X_OFFSET 28
-#define ABS_OFFSET 24
-#define SI_OFFSET 20
-#define SR_OFFSET 16
-#define ZI_OFFSET 12
-#define ZR_OFFSET 8
-#define CI_OFFSET 4
-#define CR_OFFSET 0
+#define A0_OFFSET 2128
+#define FP_OFFSET 2124
+#define GP_OFFSET 2120
+#define DATA_OFFSET 2116
+#define DATA_LEN_OFFSET 2112
+#define BUFF_ADDR_OFFSET 2108
+#define BUFF_LEN_OFFSET 2104
+#define IP_OFFSET 2100
+#define CPI_OFFSET 2096
+#define CPR_OFFSET 2092
+#define RES_OFFSET 2088
+#define C_OFFSET 2084
+#define Y_OFFSET 2080
+#define X_OFFSET 2076
+#define ABS_OFFSET 2072
+#define SI_OFFSET 2068
+#define SR_OFFSET 2064
+#define ZI_OFFSET 2060
+#define ZR_OFFSET 2056
+#define CI_OFFSET 2052
+#define CR_OFFSET 2048
+#define BUFF_INIT 0
 
 #define PARAM_UL_RE 0
 #define PARAM_UL_IM 4
@@ -41,18 +42,6 @@
 #define PARAM_FD 44
 
     .text
-
-# Going to need a register to store the buff location
-.macro write_buffer (%data, %len)
-    blt t2, BUF_SZ, not_flush_buffer
-    write_file t3
-    la t1, buffer_ini 
-not_flush_buffer:
-    sw %data, 0(t1)
-    li t1, %len
-    addi t2, t2, %len
-.end_macro
-
     .abicalls
     .align 2
     .globl mips32_plot
@@ -74,7 +63,7 @@ mips32_plot:
     lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
     sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
     
-    la t0, buffer_ini
+    li t0, BUFF_INIT
     sw t0, BUFF_ADDR_OFFSET($fp)	# store buff_addr on mem($fp + BUFF_ADDR_OFFSET)
     li t0, 0
     sw t0, BUFF_LEN_OFFSET($fp)		# store buff_len on mem($fp + BUFF_LEN_OFFSET)
@@ -90,47 +79,47 @@ mips32_plot:
     sw t0, DATA_OFFSET($fp)
     li t0, 3
     sw t0, DATA_LEN_OFFSET($fp) 
-    jal write_buffer
+    jal write_file
     
-    lw t0, A0_OFFSET($fp)	# t0 = params
+    lw t0, A0_OFFSET($fp)	    # t0 = params
     addu t0, t0, PARAM_X_RES	# t0 = &x_res
-    sw t0, DATA_OFFSET($fp)	# store &x_res on mem($fp + DATA_OFFSET)
+    sw t0, DATA_OFFSET($fp)	    # store &x_res on mem($fp + DATA_OFFSET)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp) 
-    jal write_buffer
+    jal write_file
 
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
-    jal write_buffer
+    jal write_file
     
     lw t0, A0_OFFSET(fp)
-    lw t0, t0, PARAM_Y_RES	# t0 = &y_res 
+    addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
-    jal write_buffer
+    jal write_file
 
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
-    jal write_buffer
+    jal write_file
     
     
     lw t0, A0_OFFSET(fp)
-    lw t0, t0, PARAM_SHADES	# t0 = &shades 
+    addu t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
-    jal write_buffer
+    jal write_file
 
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
-    jal write_buffer
+    jal write_file
 
     ###############################################################
 
@@ -141,13 +130,13 @@ mips32_plot:
 
     lw t0, A0_OFFSET($fp)	# parms on t0
 
-    li t4, 0			# y = 0 on t4
+    li t4, 0			    # y = 0 on t4
     lw t5, PARAM_UL_IM(t0)	# ci = parms->UL_im on t5
 UL_im_loop:
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
-    beq t4, t6, fflush	# if (y < parms->y_res) continue
+    beq t4, t6, fflush	    # if (y < parms->y_res) continue
 
-    li t7, 0			# x = 0 on t7
+    li t7, 0			    # x = 0 on t7
     lw t8, PARAM_UL_RE(t0)	# cr = parms->UL_re on t8
 UL_re_loop:
     lw t6, PARAM_X_RES(t0)	# parms->x_res on t6
@@ -173,10 +162,10 @@ shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, write_shade	# if (c < parms->shades) continue
 
-    mul t6, t4, t4		# zr * zr on t6
-    mul t7, t5, t5		# zi * zi on t7
+    mul t6, t4, t4		    # zr * zr on t6
+    mul t7, t5, t5		    # zi * zi on t7
 
-    addu t8, t6, t7		# absz = zr² + zi² on t8
+    addu t8, t6, t7		    # absz = zr² + zi² on t8
     addiu t8, t8, -4		# absz - 4 on t8 
     bgtz t8, write_shade	# if (absz - 4 > 0) write_shade
     
@@ -185,15 +174,15 @@ shades_loop:
     # si = 2 * zr * zi + cpi
     sw t4, ZR_OFFSET($fp)
     sw t5, ZI_OFFSET($fp)
-    subu t4, t6, t7		# zr**2 - zi**2 in t4 (sr)
+    subu t4, t6, t7		    # zr**2 - zi**2 in t4 (sr)
     lw t5, CPR_OFFSET($fp)
-    addu t4, t4, t5      # (zr*zr-zi*zi) + cpr
+    addu t4, t4, t5         # (zr*zr-zi*zi) + cpr
     lw t5, ZI_OFFSET($fp)
     lw t6, ZR_OFFSET($fp)
-    mul t7, t5, t6		# (zr * zi)
-    add t7, t7, t7		# 2 * (zr*zi) 
+    mul t7, t5, t6		    # (zr * zi)
+    add t7, t7, t7		    # 2 * (zr*zi) 
     lw t4, CPI_OFFSET($fp)
-    addu t7, t7, t4      # (2*zr*zi) + cpi 
+    addu t7, t7, t4         # (2*zr*zi) + cpi 
 
     # Se puede obviar si las operaciones finales se hacen sobre t4 y t5
     # respectivamente
@@ -209,9 +198,16 @@ shades_loop:
 write_shade:
     # Shades are being calculated in t9. So we have to write the t9 color value
     # Appending in buffer color\n
-    write_buffer t9, 4
-    lw t6, line_break
-    write_buffer t6, 1
+    sw t9, DATA_OFFSET($fp)
+    li t0, 4
+    sw t0, DATA_LEN_OFFSET($fp)
+    jal write_file
+    # We should only write \n if the line is near 60 characters
+    lw t6, line_break 
+    sw t6, DATA_OFFSET($fp)
+    li t0, 1
+    sw t0, DATA_LEN_OFFSET($fp)
+    jal write_file
 
     #### Restore state
     lw t4, Y_OFFSET($fp)
@@ -237,35 +233,33 @@ fflush:
     j success
 
 write_file:
-    lw t1, BUFF_LEN($fp)
+    lw t1, BUFF_LEN_OFFSET($fp)
     blt t1, BUF_SZ, not_flush_buffer
-    # Buffer stored in t0 / Buffer length in t1
     li v0, SYS_write			# system call for write to file
-    
     lw t0, A0_OFFSET($fp)		# t0 = params
     lw a0, PARAM_FD(t0) 		# file descriptor
-    # Creo que deberia ser el inicio del buffer siempre lw a1, buffer_ini
-    lw a1, BUFF_ADDR_OFFSET($fp)	# address of buffer from which to write
-    lw a2, BUFF_LEN_OFFSET($fp)		# buffer length, alt move a2, t1
-    syscall				# write to file
+    lw a1, BUFF_INIT($fp)	    # address of buffer from which to write
+    lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
+    syscall				        # write to file
     bltz v0, io_error			# if v0 < 0, io error
-    la t0, buffer_ini      		# reset buffer
-    li t1, 0
-    sw t0, BUFF_ADDR($fp)
-    sw t1, BUFF_LEN($fp)
+    #li t0, BUFF_INIT      		# reset buffer
+    li t1, 0                   # reset buffer length
+    #sw t0, BUFF_ADDR_OFFSET($fp)
+    sw t1, BUFF_LEN_OFFSET($fp)
 not_flush_buffer:
-    lw t0, BUFF_ADDR($fp)
-    lw t1, BUFF_LEN($fp)
-    # Going to need space in stack for data and len
+    lw t0, BUFF_LEN_OFFSET($fp)
+    add t1, t0, fp              # t0 = 0 (fp) + buff_len
+    #lw t1, BUFF_LEN_OFFSET($fp)
     lw t2, DATA_OFFSET($fp)
     lw t3, DATA_LEN_OFFSET($fp)
-    sw t2, 0(t0) # store data in buff_addr
-    add t0, t0, t3 # buff_addr + data_len
-    sw t0, BUFF_ADDR($fp)
-    add t1, t1, t3
-    sw t1, BUFF_LEN($fp)
-    lw t6, IP_OFFSET($fp)		# loads loads mem(sp + IP_OFFSET) on t6
-    jr t6
+    sw t2, 0(t1)                # store data in buff_addr
+    add t0, t0, t3              # buff_addr + data_len
+    #sw t0, BUFF_ADDR_OFFSET($fp)
+    #add t1, t1, t3
+    sw t1, BUFF_LEN_OFFSET($fp)
+    # lw t6, IP_OFFSET($fp)		# loads loads mem(sp + IP_OFFSET) on t6
+    #jr t6
+    jr ra
 
 io_error:
     li v0, SYS_write
@@ -301,6 +295,3 @@ line_break:
 	.ascii "\n"
 error_msg:
 	.asciiz "i/o error.\n"
-
-buffer_ini:
-    .space BUF_SZ

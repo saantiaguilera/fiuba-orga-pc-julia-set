@@ -234,7 +234,7 @@ UL_im_icr:
     j UL_im_loop
 
 flush_end:
-    beqz t2, 0, success
+    beqz t2, success
 	li v0, SYS_write			# system call for write to file
     lw t0, A0_OFFSET($fp)		# t0 = params
     lw a0, PARAM_FD(t0) 		# file descriptor

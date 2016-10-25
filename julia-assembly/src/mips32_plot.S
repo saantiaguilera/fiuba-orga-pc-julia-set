@@ -139,6 +139,8 @@ mips32_plot:
     # entre (parms->UL_re, parms->UL_im) y (parms->LR_re, parms->LR_im).
     # El parámetro de iteración es el punto (cr, ci).
 
+    lw t0, A0_OFFSET($fp)	# parms on t0
+
     li t4, 0			# y = 0 on t4
     lw t5, PARAM_UL_IM(t0)	# ci = parms->UL_im on t5
 UL_im_loop:
@@ -289,9 +291,9 @@ return:
 
     jr ra
     
-	.end mips32_plot
+    .end mips32_plot
 
-	.rdata
+    .rdata
     .align 2
 header: 
 	.asciiz "P2\n"

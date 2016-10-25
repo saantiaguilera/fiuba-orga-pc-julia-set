@@ -2,30 +2,31 @@
 #include <sys/syscall.h>
 
 #define BUF_SZ 8192
+#define BUF_SZ_B BUF_SZ/4
 
-#define STACK_SZ (76+BUF_SZ/4)
+#define STACK_SZ (76+BUF_SZ_B)
 
-#define A0_OFFSET 2128
-#define FP_OFFSET 2124
-#define GP_OFFSET 2120
-#define DATA_OFFSET 2116
-#define DATA_LEN_OFFSET 2112
-#define BUFF_ADDR_OFFSET 2108
-#define BUFF_LEN_OFFSET 2104
-#define IP_OFFSET 2100
-#define CPI_OFFSET 2096
-#define CPR_OFFSET 2092
-#define RES_OFFSET 2088
-#define C_OFFSET 2084
-#define Y_OFFSET 2080
-#define X_OFFSET 2076
-#define ABS_OFFSET 2072
-#define SI_OFFSET 2068
-#define SR_OFFSET 2064
-#define ZI_OFFSET 2060
-#define ZR_OFFSET 2056
-#define CI_OFFSET 2052
-#define CR_OFFSET 2048
+#define A0_OFFSET BUF_SZ_B+80
+#define FP_OFFSET BUF_SZ_B+76
+#define GP_OFFSET BUF_SZ_B+72
+#define DATA_OFFSET BUF_SZ_B+68
+#define DATA_LEN_OFFSET BUF_SZ_B+64
+#define BUFF_ADDR_OFFSET BUF_SZ_B+60
+#define BUFF_LEN_OFFSET BUF_SZ_B+56
+#define IP_OFFSET BUF_SZ_B+52
+#define CPI_OFFSET BUF_SZ_B+48
+#define CPR_OFFSET BUF_SZ_B+44
+#define RES_OFFSET BUF_SZ_B+40
+#define C_OFFSET BUF_SZ_B+36
+#define Y_OFFSET BUF_SZ_B+32
+#define X_OFFSET BUF_SZ_B+28
+#define ABS_OFFSET BUF_SZ_B+24
+#define SI_OFFSET BUF_SZ_B+20
+#define SR_OFFSET BUF_SZ_B+16
+#define ZI_OFFSET BUF_SZ_B+12
+#define ZR_OFFSET BUF_SZ_B+8
+#define CI_OFFSET BUF_SZ_B+4
+#define CR_OFFSET BUF_SZ_B
 #define BUFF_INIT 0
 
 #define PARAM_UL_RE 0

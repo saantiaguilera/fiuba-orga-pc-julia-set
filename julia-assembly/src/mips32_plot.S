@@ -113,8 +113,8 @@ mips32_plot:
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file
     
-	lw t0, A0_OFFSET($fp) 
-	addu t0, t0, PARAM_SHADES	# t0 = &shades 
+    lw t0, A0_OFFSET($fp) 
+    addu t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
@@ -235,7 +235,7 @@ UL_im_icr:
 
 flush_end:
     beqz t2, success
-	li v0, SYS_write			# system call for write to file
+    li v0, SYS_write			# system call for write to file
     lw t0, A0_OFFSET($fp)		# t0 = params
     lw a0, PARAM_FD(t0) 		# file descriptor
     lw a1, BUFF_INIT($fp)	    # address of buffer from which to write

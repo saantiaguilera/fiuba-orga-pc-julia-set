@@ -105,6 +105,7 @@ mips32_plot:
     addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
     lw t0, 0(t0)                # t0 = y_res
     sw t0, DATA_OFFSET($fp)
+    sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file

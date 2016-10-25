@@ -109,8 +109,7 @@ mips32_plot:
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_file
-    
-    
+     
     lw t0, A0_OFFSET(fp)
     addu t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
@@ -137,7 +136,7 @@ mips32_plot:
     lw t5, PARAM_UL_IM(t0)	# ci = parms->UL_im on t5
 UL_im_loop:
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
-    beq t4, t6, flush__end	#  if (y < parms->y_res) continue
+    beq t4, t6, flush_end	#  if (y < parms->y_res) continue
 
     li t7, 0			    # x = 0 on t7
     lw t8, PARAM_UL_RE(t0)	# cr = parms->UL_re on t8

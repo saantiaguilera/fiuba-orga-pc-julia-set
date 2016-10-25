@@ -137,7 +137,7 @@ mips32_plot:
     lw t5, PARAM_UL_IM(t0)	# ci = parms->UL_im on t5
 UL_im_loop:
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
-    beq t4, t6, fflush	    # if (y < parms->y_res) continue
+    beq t4, t6, flush__end	#  if (y < parms->y_res) continue
 
     li t7, 0			    # x = 0 on t7
     lw t8, PARAM_UL_RE(t0)	# cr = parms->UL_re on t8
@@ -231,8 +231,15 @@ UL_im_icr:
     subu t5, t5, t6		# ci -= parms->d_im
     j UL_im_loop
 
-fflush:
-    bgt t2, 0, flush_buffer
+flush_end:
+    beqz t2, 0, success
+	li v0, SYS_write			# system call for write to file
+    lw t0, A0_OFFSET($fp)		# t0 = params
+    lw a0, PARAM_FD(t0) 		# file descriptor
+    lw a1, BUFF_INIT($fp)	    # address of buffer from which to write
+    lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
+    syscall				        # write to file
+    bltz v0, io_error			# if v0 < 0, io error
     j success
 
 write_file:
@@ -290,7 +297,7 @@ return:
     
     .end mips32_plot
 
-    .rdata
+    .data
     .align 2
 header: 
 	.asciiz "P2\n"

@@ -65,6 +65,7 @@ mips32_plot:
     subu sp, sp, STACK_SZ	# push stack pointer down
     sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
+    sw ra, IP_OFFSET(sp)    # store ra on mem(sp + IP_OFFSET)
     move $fp, sp		# $fp = sp
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) (callee's stack frame)
     ###############################################################
@@ -82,14 +83,61 @@ mips32_plot:
     
     #### Inicializamos el buffer ####
 
-    empty_buffer
+    la t0, buffer_ini
+    sw t0, BUFF_ADDR_OFFSET($fp)
+    li t0, 0
+    sw t0, BUFF_LEN_OFFSET($fp)
 
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
 
-    lw t4, (header)
-    write_buffer t4 3
+    
+    la t0, header
+    sw t0, DATA_OFFSET($fp)
+    li t0, 3
+    sw t0, DATA_LEN_OFFSET($fp) 
+    jal write_buffer
+    
 
+
+    lw t0, A0_OFFSET(fp) 
+    lw t0, PARAM_X_RES(t0) # t0 = x_res 
+    sw t0, DATA_OFFSET($fp)
+    li t0, 4
+    sw t0, DATA_LEN_OFFSET($fp) #t0 = 4 (size_t) 
+    jal write_buffer
+    la t0, line_break
+    sw t0, DATA_OFFSET($fp)
+    li t0, 1
+    sw t0, DATA_LEN_OFFSET($fp)
+    jal write_buffer
+    
+    lw t0, A0_OFFSET(fp)
+    lw t0, PARAM_Y_RES(t0) # t0 = y_res 
+    sw t0, DATA_OFFSET($fp)
+    li t0, 4
+    sw t0, DATA_LEN_OFFSET($fp) # t0 = 4 (size_t)
+    jal write_buffer
+    la t0, line_break
+    sw t0, DATA_OFFSET($fp)
+    li t0, 1
+    sw t0, DATA_LEN_OFFSET($fp)
+    jal write_buffer
+    
+    
+    lw t0, A0_OFFSET(fp)
+    lw t0, PARAM_SHADES(t0) # t0 = shades 
+    sw t0, DATA_OFFSET($fp)
+    li t0, 4
+    sw t0, DATA_LEN_OFFSET($fp) # t0 = 4 (size_t)
+    jal write_buffer
+    la t0, line_break
+    sw t0, DATA_OFFSET($fp)
+    li t0, 1
+    sw t0, DATA_LEN_OFFSET($fp)
+    jal write_buffer
+    
+    ################ OLD ####
     lw t4, PARAM_X_RES(t0)
     write_buffer t4, 8
     lw t4, line_break

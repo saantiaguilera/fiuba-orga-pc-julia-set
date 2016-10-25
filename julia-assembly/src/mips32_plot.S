@@ -89,7 +89,8 @@ mips32_plot:
     
     lw t0, A0_OFFSET($fp)	    # t0 = params
     addu t0, t0, PARAM_X_RES	# t0 = &x_res
-    sw t0, DATA_OFFSET($fp)	    # store &x_res on mem($fp + DATA_OFFSET)
+    lw t0, 0(t0)                # t0 = x_res
+    sw t0, DATA_OFFSET($fp)	    # store x_res on mem($fp + DATA_OFFSET)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp) 
     jal write_file
@@ -102,6 +103,7 @@ mips32_plot:
     
     lw t0, A0_OFFSET($fp)
     addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
+    lw t0, 0(t0)                # t0 = y_res
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
@@ -115,6 +117,7 @@ mips32_plot:
     
 	lw t0, A0_OFFSET($fp) 
 	addu t0, t0, PARAM_SHADES	# t0 = &shades 
+    lw t0, 0(t0)                # t0 = shades
     sw t0, DATA_OFFSET($fp)
     li t0, 4
     sw t0, DATA_LEN_OFFSET($fp)
@@ -251,7 +254,9 @@ write_file:
     li v0, SYS_write			# system call for write to file
     lw t0, A0_OFFSET($fp)		# t0 = params
     lw a0, PARAM_FD(t0) 		# file descriptor
-    lw a1, BUFF_INIT($fp)	    # address of buffer from which to write
+    li t0, BUFF_INIT
+    add t0, t0, $fp
+    lw a1, t0	                # address of buffer from which to write
     lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
     syscall				        # write to file
     bltz v0, io_error			# if v0 < 0, io error

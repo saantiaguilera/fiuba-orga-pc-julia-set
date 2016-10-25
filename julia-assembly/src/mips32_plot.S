@@ -246,7 +246,8 @@ flush_end:
 
 write_file:
     lw t1, BUFF_LEN_OFFSET($fp)
-    blt t1, BUF_SZ, not_flush_buffer
+    li t2, BUF_SZ
+    blt t1, t2, not_flush_buffer
     li v0, SYS_write			# system call for write to file
     lw t0, A0_OFFSET($fp)		# t0 = params
     lw a0, PARAM_FD(t0) 		# file descriptor
@@ -268,7 +269,7 @@ not_flush_buffer:
     add t0, t0, t3              # buff_addr + data_len
     #sw t0, BUFF_ADDR_OFFSET($fp)
     #add t1, t1, t3
-    sw t1, BUFF_LEN_OFFSET($fp)
+    sw t0, BUFF_LEN_OFFSET($fp)
     # lw t6, IP_OFFSET($fp)		# loads loads mem(sp + IP_OFFSET) on t6
     #jr t6
     jr ra

@@ -81,12 +81,10 @@ mips32_plot:
     ###############################################################
     
     #### Hace falta abrir el fd? ####
-
-    lw t3, PARAM_FD(a0)	# params->fd on t3
+    lw t0, PARAM_FD(a0)	# params->fd on t0
     
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
-
     
     la t0, header
     sw t0, DATA_OFFSET($fp)
@@ -94,14 +92,13 @@ mips32_plot:
     sw t0, DATA_LEN_OFFSET($fp) 
     jal write_buffer
     
-
-
-    lw t0, A0_OFFSET(fp) 
-    lw t0, PARAM_X_RES(t0) # t0 = x_res 
-    sw t0, DATA_OFFSET($fp)
+    lw t0, A0_OFFSET($fp)	# t0 = params
+    addu t0, t0, PARAM_X_RES	# t0 = &x_res
+    sw t0, DATA_OFFSET($fp)	# store &x_res on mem($fp + DATA_OFFSET)
     li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp) #t0 = 4 (size_t) 
+    sw t0, DATA_LEN_OFFSET($fp) 
     jal write_buffer
+
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
@@ -109,11 +106,12 @@ mips32_plot:
     jal write_buffer
     
     lw t0, A0_OFFSET(fp)
-    lw t0, PARAM_Y_RES(t0) # t0 = y_res 
+    lw t0, t0, PARAM_Y_RES	# t0 = &y_res 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp) # t0 = 4 (size_t)
+    sw t0, DATA_LEN_OFFSET($fp)
     jal write_buffer
+
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
@@ -122,32 +120,17 @@ mips32_plot:
     
     
     lw t0, A0_OFFSET(fp)
-    lw t0, PARAM_SHADES(t0) # t0 = shades 
+    lw t0, t0, PARAM_SHADES	# t0 = &shades 
     sw t0, DATA_OFFSET($fp)
     li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp) # t0 = 4 (size_t)
+    sw t0, DATA_LEN_OFFSET($fp)
     jal write_buffer
+
     la t0, line_break
     sw t0, DATA_OFFSET($fp)
     li t0, 1
     sw t0, DATA_LEN_OFFSET($fp)
     jal write_buffer
-    
-    ################ OLD ####
-    lw t4, PARAM_X_RES(t0)
-    write_buffer t4, 8
-    lw t4, line_break
-    write_buffer t4, 1
-    
-    lw t4, PARAM_Y_RES(t0)
-    write_buffer t4, 8
-    lw t4, line_break
-    write_buffer t4, 1
-	
-    lw t4, PARAM_SHADES(t0)
-    write_buffer t4, 8
-    lw t4, line_break
-    write_buffer t4, 1
 
     ###############################################################
 
@@ -254,15 +237,17 @@ fflush:
 write_file:
     lw t1, BUFF_LEN($fp)
     blt t1, BUF_SZ, not_flush_buffer
-	# Buffer stored in t0 / Buffer length in t1
-    li v0, SYS_write	    # system call for write to file
-    lw a0, PARAM_FD($fp) 	# file descriptor
+    # Buffer stored in t0 / Buffer length in t1
+    li v0, SYS_write			# system call for write to file
+    
+    lw t0, A0_OFFSET($fp)		# t0 = params
+    lw a0, PARAM_FD(t0) 		# file descriptor
     # Creo que deberia ser el inicio del buffer siempre lw a1, buffer_ini
     lw a1, BUFF_ADDR_OFFSET($fp)	# address of buffer from which to write
-    lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
-    syscall				    # write to file
-    bltz v0, io_error	    # if v0 < 0, io error
-    la t0, buffer_ini       # reset buffer
+    lw a2, BUFF_LEN_OFFSET($fp)		# buffer length, alt move a2, t1
+    syscall				# write to file
+    bltz v0, io_error			# if v0 < 0, io error
+    la t0, buffer_ini      		# reset buffer
     li t1, 0
     sw t0, BUFF_ADDR($fp)
     sw t1, BUFF_LEN($fp)
@@ -277,12 +262,12 @@ not_flush_buffer:
     sw t0, BUFF_ADDR($fp)
     add t1, t1, t3
     sw t1, BUFF_LEN($fp)
-	lw t6, IP_OFFSET($fp) # loads loads mem(sp + IP_OFFSET) on t6
-	jr t6
+    lw t6, IP_OFFSET($fp)		# loads loads mem(sp + IP_OFFSET) on t6
+    jr t6
 
 io_error:
     li v0, SYS_write
-    li a0, 2 #TODO stderr tiene fd 2 ????
+    li a0, 2
     la a1, error_msg
     li a2, 11
     syscall

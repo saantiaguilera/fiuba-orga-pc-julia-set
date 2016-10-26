@@ -221,7 +221,7 @@ update_buffer:
     lw t1, BUFF_LEN_OFFSET($fp) # buff_len on t1
     
     # Hay lugar para 5 bytes en el buffer?
-    lw t4, BUF_SZ
+    li t4, BUF_SZ
     subu t4, t4, t1	# BUF_SZ - buff_len
     li t5, 5
     bge t4, t5, write_buffer # if (BUF_SZ - buff_len >= 5) store

@@ -265,7 +265,7 @@ store_shade:
 UL_re_icr:
     addi t7, t7, 1 		    # ++x
     lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
-    add t8, t8, t6		    # cr += parms->d_re
+    addu t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:

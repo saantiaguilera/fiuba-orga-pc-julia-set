@@ -26,7 +26,7 @@
 #define ZR_OFFSET BUF_SZ+8
 #define CI_OFFSET BUF_SZ+4
 #define CR_OFFSET BUF_SZ
-#define BUFF_INIT 0
+#define BUFF_OFFSET 0
 
 #define PARAM_UL_RE 0
 #define PARAM_UL_IM 4
@@ -85,7 +85,7 @@ mips32_plot:
     ###############################################################
     # Store PGM header on buffer, this is "P2\nx_res\ny_res\nshades\n"
     
-    addiu t0, $fp, BUFFER_OFFSET	# buff_addr on t0
+    addiu t0, $fp, BUFF_OFFSET	# buff_addr on t0
     lw t1, BUFF_LEN_OFFSET($fp)		# buff_len on t1
 
 title:
@@ -222,21 +222,21 @@ update_buffer:
     li t5, 5
     bge t4, t5, write_buffer # if (BUF_SZ - buff_len >= 5) store
     
-write_buffer:
-	lw t0, A0_OFFSET($fp)		# parms on t0
-    lw t1, $fp, BUFFER_OFFSET	# buff_addr on t1
-    lw t2, BUFF_LEN_OFFSET($fp) # buff_len on t2
-    
+write_buffer:  
 	li v0, SYS_write			# system call for write to file
-	lw t0, PARAM_FD(t0)			# file descriptor 
-	addiu a1, fp, BUFFER_OFFSET	# address of buffer from which to write
-	li a2, BUZ_SZ				# hardcoded buffer length
+	lw t0, A0_OFFSET($fp)		# parms on t0
+	lw a0, PARAM_FD(t0)			# file descriptor 
+	addiu a1, fp, BUFF_OFFSET	# address of buffer from which to write
+	li a2, BUZ_SZ				# buffer length
 	syscall						# write to file
+	bltz v0, io_error			# if v0 < 0, io error
+
+	sw zero, BUFF_LEN_OFFSET($fp)	# reset buffer
 	
 store_shade:
-    lw t1, $fp, BUFFER_OFFSET	# buff_addr on t1
-    lw t2, BUFF_LEN_OFFSET($fp) # buff_len on t2
-    lw t3, C_OFFSET($fp)		# recover c from stack
+    addiu t1, $fp, BUFF_OFFSET	# buff_addr on t1
+    lw t2, BUFF_LEN_OFFSET($fp) 	# buff_len on t2
+    lw t3, C_OFFSET($fp)			# recover c from stack
     
     sw t3, t2(t1)				# buff_addr[buff_len] = c
     addiu t2, t2, 4				# buff_len += 4
@@ -269,14 +269,13 @@ UL_im_icr:
     j UL_im_loop
 
 flush_end:
-    beqz t2, success
 	li v0, SYS_write			# system call for write to file
-    lw t0, A0_OFFSET($fp)		# t0 = params
-    lw a0, PARAM_FD(a0) 		# file descriptor
-    lw a1, BUFF_INIT($fp)	    # address of buffer from which to write
-    lw a2, BUFF_LEN_OFFSET($fp)	# buffer length, alt move a2, t1
-    syscall				        # write to file
-    bltz v0, io_error			# if v0 < 0, io error
+	lw t0, A0_OFFSET($fp)		# parms on t0
+	lw a0, PARAM_FD(t0)			# file descriptor 
+	addiu a1, fp, BUFF_OFFSET	# address of buffer from which to write
+	lw a2, BUFF_LEN_OFFSET($fp)	# buffer length
+	syscall						# write to file
+	bltz v0, io_error			# if v0 < 0, io error
     j success
 
 io_error:

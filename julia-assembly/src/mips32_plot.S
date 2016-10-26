@@ -224,7 +224,7 @@ update_buffer:
     li t4, BUF_SZ
     subu t4, t4, t1	# BUF_SZ - buff_len
     li t5, 5
-    bge t4, t5, write_buffer # if (BUF_SZ - buff_len >= 5) store
+    bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 5) KB!! store
     
 write_buffer:  
 	li v0, SYS_write			# system call for write to file

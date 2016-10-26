@@ -99,7 +99,7 @@ x_res:
     lw t2, PARAM_X_RES(a0)	# load parms->x_res on t2
     
     addu t3, t0, t1
-    sw t2, 0(t3)			# store x_res on buff
+    usw t2, 0(t3)			# store x_res on buff
     addiu t1, t1, 4			# buff_len++
 
     la t2, line_break		# load line_break addr
@@ -112,7 +112,7 @@ y_res:
     lw t2, PARAM_Y_RES(a0)
     
     addu t3, t0, t1
-    sw t2, 0(t3)
+    usw t2, 0(t3)
     addiu t1, t1, 4
    
     la t2, line_break
@@ -125,7 +125,7 @@ shades:
     lw t2, PARAM_SHADES(a0)
     
     addu t3, t0, t1
-    sw t2, 0(t3)
+    usw t2, 0(t3)
     addiu t1, t1, 4
 
     la t2, line_break
@@ -243,7 +243,7 @@ store_shade:
     lw t3, C_OFFSET($fp)			# recover c from stack
     
     addu t4, t1, t2
-    sw t3, 0(t4)				# buff_addr[buff_len] = c
+    usw t3, 0(t4)				# buff_addr[buff_len] = c
     addiu t2, t2, 4				# buff_len += 4
     
     la t3, line_break

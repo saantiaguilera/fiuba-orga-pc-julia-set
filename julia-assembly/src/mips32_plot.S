@@ -84,57 +84,56 @@ mips32_plot:
     ###############################################################
     
     ###############################################################
-    # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"
+    # Store PGM header on buffer, this is "P2\nx_res\ny_res\nshades\n"
     
-    la t0, header
-    sw t0, DATA_OFFSET($fp)
-    li t0, 3
-    sw t0, DATA_LEN_OFFSET($fp) 
-    jal write_file
+    addiu t0, $fp, BUFFER_OFFSET 	# buff_addr on t0
+    lw t1, BUFFER_LEN_OFFSET($fp)	# buff_len on t1
+
+title:
+    li t2, 0			# i = 0
+title_loop:
+    li t3, 3
+    bge t2, t3, x_res		# if (i >= 3) finish 
+    la t3, header
+    lb t3, t2(t3)		# header[i]
+    sb t3, t1(t0)		# store header[i] on buff_addr[buff_len]
+    addiu t1, t1, 1		# buff_len++
+    addiu t2, t2, 1		# i++
+    j title_loop
+
+x_res:
+    lw t2, PARAM_X_RES(a0)	# load parms->x_res on t2
+    sw t2, t1(t0)		# store x_res on buff
+    addiu t1, t1, 4		# buff_len++
+
+    la t2, line_break		# load line_break addr
+    lb t2, 0(t2)		# load line_break
+    sb t2, t1(t0)		# store libe_break on buff
+    addiu t1, t1, 1		# buff_len++
+
+y_res:
+    lw t2, PARAM_Y_RES(a0)
+    sw t2, t1(t0)
+    addiu t1, t1, 4
+   
+    la t2, line_break
+    lb t2, 0(t2)
+    sb t2, t1(t0)
+    addiu t1, t1, 1
+
+shades:
+    lw t2, PARAM_SHADES(a0)
+    sw t2, t1(t0)
+    addiu t1, t1, 4
+
+    la t2, line_break
+    lb t2, 0(t2)
+    sb t2, t1(t0)
+    addiu t1, t1, 1
+
     
-    lw t0, A0_OFFSET($fp)	    # t0 = params
-    addu t0, t0, PARAM_X_RES	# t0 = &x_res
-    lw t0, 0(t0)                # t0 = x_res
-    sw t0, DATA_OFFSET($fp)	    # store x_res on mem($fp + DATA_OFFSET)
-    li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp) 
-    jal write_file
-
-    la t0, line_break
-    sw t0, DATA_OFFSET($fp)
-    li t0, 1
-    sw t0, DATA_LEN_OFFSET($fp)
-    jal write_file
-    
-    lw t0, A0_OFFSET($fp)
-    addu t0, t0, PARAM_Y_RES	# t0 = &y_res 
-    lw t0, 0(t0)                # t0 = y_res
-    sw t0, DATA_OFFSET($fp)
-    sw t0, DATA_OFFSET($fp)
-    li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp)
-    jal write_file
-
-    la t0, line_break
-    sw t0, DATA_OFFSET($fp)
-    li t0, 1
-    sw t0, DATA_LEN_OFFSET($fp)
-    jal write_file
-    
-	lw t0, A0_OFFSET($fp) 
-	addu t0, t0, PARAM_SHADES	# t0 = &shades 
-    lw t0, 0(t0)                # t0 = shades
-    sw t0, DATA_OFFSET($fp)
-    li t0, 4
-    sw t0, DATA_LEN_OFFSET($fp)
-    jal write_file
-
-    la t0, line_break
-    sw t0, DATA_OFFSET($fp)
-    li t0, 1
-    sw t0, DATA_LEN_OFFSET($fp)
-    jal write_file
-
+    sw t1, BUFF_LEN_OFFSET($fp)
+ 
     ###############################################################
 
     ###############################################################

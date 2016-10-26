@@ -3,29 +3,23 @@
 
 #define BUF_SZ 8192
 
-#define STACK_SZ 76+BUF_SZ
+#define STACK_SZ BUF_SZ+56
 
-#define A0_OFFSET 2128
-#define FP_OFFSET BUF_SZ+76
-#define GP_OFFSET BUF_SZ+72
-#define DATA_OFFSET BUF_SZ+68
-#define DATA_LEN_OFFSET BUF_SZ+64
-#define BUFF_ADDR_OFFSET BUF_SZ+60
-#define BUFF_LEN_OFFSET BUF_SZ+56
-#define IP_OFFSET BUF_SZ+52
-#define CPI_OFFSET BUF_SZ+48
-#define CPR_OFFSET BUF_SZ+44
-#define RES_OFFSET BUF_SZ+40
+#define A0_OFFSET BUF_SZ+56
+#define FP_OFFSET BUF_SZ+52
+#define GP_OFFSET BUF_SZ+48
+#define CPI_OFFSET BUF_SZ+44
+#define CPR_OFFSET BUF_SZ+40
 #define C_OFFSET BUF_SZ+36
 #define Y_OFFSET BUF_SZ+32
 #define X_OFFSET BUF_SZ+28
-#define ABS_OFFSET BUF_SZ+24
-#define SI_OFFSET BUF_SZ+20
-#define SR_OFFSET BUF_SZ+16
-#define ZI_OFFSET BUF_SZ+12
-#define ZR_OFFSET BUF_SZ+8
-#define CI_OFFSET BUF_SZ+4
-#define CR_OFFSET BUF_SZ
+#define SI_OFFSET BUF_SZ+24
+#define SR_OFFSET BUF_SZ+20
+#define ZI_OFFSET BUF_SZ+16
+#define ZR_OFFSET BUF_SZ+12
+#define CI_OFFSET BUF_SZ+8
+#define CR_OFFSET BUF_SZ+4
+#define BUFF_LEN_OFFSET BUF_SZ
 #define BUFF_OFFSET 0
 
 #define PARAM_UL_RE 0
@@ -67,7 +61,6 @@ mips32_plot:
     sw t0, C_OFFSET($fp)	# store c = 0 on mem($fp + C_OFFSET) 
     sw t0, X_OFFSET($fp)	# store x = 0 on mem($fp + X_OFFSET)
     sw t0, Y_OFFSET($fp)	# store y = 0 on mem($fp + Y_OFFSET)
-    sw t0, ABSZ_OFFSET($fp)	# store absz = 0 on mem($fp + ABSZ_OFFSET)
     sw t0, SI_OFFSET($fp)	# store si = 0
     sw t0, SR_OFFSET($fp)	# store sr = 0
     sw t0, ZI_OFFSET($fp)	# store zi = 0

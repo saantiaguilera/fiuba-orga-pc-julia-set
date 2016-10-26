@@ -87,40 +87,51 @@ title_loop:
     li t3, 3
     bge t2, t3, x_res	# if (i >= 3) finish 
     la t3, header
-    lb t3, t2(t3)		# header[i]
-    sb t3, t1(t0)		# store header[i] on buff_addr[buff_len]
+    addu t3, t3, t2
+    lb t3, 0(t3)		# header[i]
+    addu t0, t0, t1
+    sb t3, 0(t0)		# store header[i] on buff_addr[buff_len]
     addiu t1, t1, 1		# buff_len++
     addiu t2, t2, 1		# i++
     j title_loop
 
 x_res:
     lw t2, PARAM_X_RES(a0)	# load parms->x_res on t2
-    sw t2, t1(t0)			# store x_res on buff
+    
+    addu t3, t0, t1
+    sw t2, 0(t3)			# store x_res on buff
     addiu t1, t1, 4			# buff_len++
 
     la t2, line_break		# load line_break addr
     lb t2, 0(t2)			# load line_break
-    sb t2, t1(t0)			# store libe_break on buff
+    addu t3, t0, t1
+    sb t2, 0(t3)			# store line_break on buff
     addiu t1, t1, 1			# buff_len++
 
 y_res:
     lw t2, PARAM_Y_RES(a0)
-    sw t2, t1(t0)
+    
+    addu t3, t0, t1
+    sw t2, 0(t3)
     addiu t1, t1, 4
    
     la t2, line_break
     lb t2, 0(t2)
-    sb t2, t1(t0)
+    addu t3, t0, t1
+    sb t2, 0(t3)
     addiu t1, t1, 1
 
 shades:
     lw t2, PARAM_SHADES(a0)
-    sw t2, t1(t0)
+    
+    addu t3, t0, t1
+    sw t2, 0(t3)
     addiu t1, t1, 4
 
     la t2, line_break
     lb t2, 0(t2)
-    sb t2, t1(t0)
+    addu t3, t0, t1
+    sb t2, 0(t3)
     addiu t1, t1, 1
 
     
@@ -210,7 +221,7 @@ update_buffer:
     lw t1, BUFF_LEN_OFFSET($fp) # buff_len on t1
     
     # Hay lugar para 5 bytes en el buffer?
-    lw t4, BUFF_SZ
+    lw t4, BUF_SZ
     subu t4, t4, t1	# BUF_SZ - buff_len
     li t5, 5
     bge t4, t5, write_buffer # if (BUF_SZ - buff_len >= 5) store
@@ -219,8 +230,8 @@ write_buffer:
 	li v0, SYS_write			# system call for write to file
 	lw t0, A0_OFFSET($fp)		# parms on t0
 	lw a0, PARAM_FD(t0)			# file descriptor 
-	addiu a1, fp, BUFF_OFFSET	# address of buffer from which to write
-	li a2, BUZ_SZ				# buffer length
+	addiu a1, $fp, BUFF_OFFSET	# address of buffer from which to write
+	li a2, BUF_SZ				# buffer length
 	syscall						# write to file
 	bltz v0, io_error			# if v0 < 0, io error
 
@@ -231,12 +242,14 @@ store_shade:
     lw t2, BUFF_LEN_OFFSET($fp) 	# buff_len on t2
     lw t3, C_OFFSET($fp)			# recover c from stack
     
-    sw t3, t2(t1)				# buff_addr[buff_len] = c
+    addu t4, t1, t2
+    sw t3, 0(t4)				# buff_addr[buff_len] = c
     addiu t2, t2, 4				# buff_len += 4
     
     la t3, line_break
-    lb t3, t3
-    sb t3, t2(t1)				# buff_addr[buff_len] = \n
+    lb t3, 0(t3)
+    addu t4, t1, t2
+    sb t3, 0(t4)				# buff_addr[buff_len] = \n
     addiu t2, t2, 1				# buff_len++
     
     sw t2, BUFF_LEN_OFFSET($fp)	# update buff_len on stack
@@ -265,7 +278,7 @@ flush_end:
 	li v0, SYS_write			# system call for write to file
 	lw t0, A0_OFFSET($fp)		# parms on t0
 	lw a0, PARAM_FD(t0)			# file descriptor 
-	addiu a1, fp, BUFF_OFFSET	# address of buffer from which to write
+	addiu a1, $fp, BUFF_OFFSET	# address of buffer from which to write
 	lw a2, BUFF_LEN_OFFSET($fp)	# buffer length
 	syscall						# write to file
 	bltz v0, io_error			# if v0 < 0, io error

@@ -89,8 +89,8 @@ title_loop:
     la t3, header
     addu t3, t3, t2
     lb t3, 0(t3)		# header[i]
-    addu t0, t0, t1
-    sb t3, 0(t0)		# store header[i] on buff_addr[buff_len]
+    addu t4, t0, t1
+    sb t3, 0(t4)		# store header[i] on buff_addr[buff_len]
     addiu t1, t1, 1		# buff_len++
     addiu t2, t2, 1		# i++
     j title_loop

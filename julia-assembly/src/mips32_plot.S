@@ -29,8 +29,6 @@
 #define CR_OFFSET BUF_SZ_B
 #define BUFF_INIT 0
 
-#define SYS_write 15
-
 #define PARAM_UL_RE 0
 #define PARAM_UL_IM 4
 #define PARAM_LR_RE 8
@@ -46,7 +44,6 @@
 
     .text
     .abicalls
-    .align 2
     .globl mips32_plot
     .ent mips32_plot
 
@@ -55,28 +52,36 @@ mips32_plot:
     ###############################################################
     # Push stack frame
     subu sp, sp, STACK_SZ	# push stack pointer down
+    
     sw $fp, FP_OFFSET(sp)	# store $fp on mem(sp + FP_OFFSET)
     sw gp, GP_OFFSET(sp)	# store gp on mem(sp + GP_OFFSET)
-    sw ra, IP_OFFSET(sp)  	# store ra on mem(sp + IP_OFFSET)
-    move $fp, sp		    # $fp = sp
-    sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) 
-                            # (callee's stack frame)
     
-    lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t1
+    move $fp, sp		# $fp = sp
+    
+    sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) 
+    
+    lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t0
     sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
     lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
     sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
+    li t0, 0			# t0 = 0
+    sw t0, C_OFFSET($fp)	# store c = 0 on mem($fp + C_OFFSET) 
+    sw t0, X_OFFSET($fp)	# store x = 0 on mem($fp + X_OFFSET)
+    sw t0, Y_OFFSET($fp)	# store y = 0 on mem($fp + Y_OFFSET)
+    sw t0, ABSZ_OFFSET($fp)	# store absz = 0 on mem($fp + ABSZ_OFFSET)
+    sw t0, SI_OFFSET($fp)	# store si = 0
+    sw t0, SR_OFFSET($fp)	# store sr = 0
+    sw t0, ZI_OFFSET($fp)	# store zi = 0
+    sw t0, ZR_OFFSET($fp)	# store zr = 0
+    lw t0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
+    sw t0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    lw t0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
+    sw t0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     
-    li t0, BUFF_INIT
-    sw t0, BUFF_ADDR_OFFSET($fp)	# store buff_addr on 
-                                    # mem($fp + BUFF_ADDR_OFFSET)
     li t0, 0
-    sw t0, BUFF_LEN_OFFSET($fp)		# store buff_len on 
-                                    # mem($fp + BUFF_LEN_OFFSET)
+    sw t0, BUFF_LEN_OFFSET($fp)	# store buff_len = 0
+
     ###############################################################
-    
-    #### Hace falta abrir el fd? ####
-    lw t0, PARAM_FD(a0)	# params->fd on t0
     
     ###############################################################
     # Write PGM header, this is "P2\nx_res\ny_res\nshades\n"

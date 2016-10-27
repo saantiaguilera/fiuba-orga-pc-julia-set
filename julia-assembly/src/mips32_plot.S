@@ -1,6 +1,8 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
+#define ASCII_0 48
+
 #define BUF_SZ 8192
 
 #define STACK_SZ BUF_SZ+56
@@ -222,7 +224,7 @@ update_buffer:
     
     # Hay lugar para 5 bytes en el buffer?
     li t4, BUF_SZ
-    subu t4, t4, t1	# BUF_SZ - buff_len
+    subu t4, t4, t1				# BUF_SZ - buff_len
     li t5, 5
     bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 5) KB!! store
     
@@ -243,8 +245,9 @@ store_shade:
     lw t3, C_OFFSET($fp)			# recover c from stack
     
     addu t4, t1, t2
-    usw t3, 0(t4)				# buff_addr[buff_len] = c
-    addiu t2, t2, 4				# buff_len += 4
+    addiu t3, t3, ASCII_0		# ascii conversion
+    sb t3, 0(t4)				# buff_addr[buff_len] = c
+    addiu t2, t2, 1				# buff_len ++
     
     la t3, line_break
     lb t3, 0(t3)

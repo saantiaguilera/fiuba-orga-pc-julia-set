@@ -99,10 +99,21 @@ title_loop:
 
 x_res:
     lw t2, PARAM_X_RES(a0)	# load parms->x_res on t2
+    #neg  t2, t2
+    li t3, 10
+loop_x:
+    div  t2, t3             # x_res /= 10
+    mflo t2
+    mfhi t4                 # get remainder
+    addi t4, t4, ASCII_0    # convert to ASCII digit
+    addu t5, t0, t1     
+    sb   t4, 0(t5)          # store it
+    addi t1, t1, 1          # adjust buf ptr 
+    bne  t2, zero, loop_x   # if not zero, loop
     
-    addu t3, t0, t1
-    usw t2, 0(t3)			# store x_res on buff
-    addiu t1, t1, 4			# buff_len++
+    #addu t3, t0, t1
+    #usw t2, 0(t3)			# store x_res on buff
+    #addiu t1, t1, 4		# buff_len++
 
     la t2, line_break		# load line_break addr
     lb t2, 0(t2)			# load line_break

@@ -198,26 +198,32 @@ loop_shds:
     lw t0, A0_OFFSET($fp)	# parms on t0
 
     lw t4, Y_OFFSET($fp)	# y on t4
-    lw t5, CI_OFFSET($fp)	# ci on t5
+    l.s $f0, CI_OFFSET($fp) # ci on f0
+    #lw t5, CI_OFFSET($fp)	# ci on t5
 UL_im_loop:
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
     bge t4, t6, flush_end	# if (y < parms->y_res) continue
 
     li t7, 0				# x = 0 on t7
-    lw t8, CR_OFFSET($fp)	# cr on t8
+    l.s $f1, CR_OFFSET($fp)	# cr on f1 
+    #lw t8, CR_OFFSET($fp)	# cr on t8
 UL_re_loop:
     lw t6, PARAM_X_RES(t0)	# parms->x_res on t6
     bge t7, t6, UL_im_icr	# if (x < parms->x_res) continue
 
     #### Save state in stack
     sw t4, Y_OFFSET($fp)	# store y on mem($fp + Y_OFFSET)
-    sw t5, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    s.s $f0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    #sw t5, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
     sw t7, X_OFFSET($fp)	# store x on mem($fp + X_OFFSET)
-    sw t8, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    s.s $f1, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    #sw t8, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     ####
 
-    move t4, t8				# zr = cr on t4
-    move t5, t5				# zi = ci on t5
+    mov.s $f2, $f0 # zi = ci 
+    mov.s $f3, $f1 # zr = cr
+    #move t4, t8				# zr = cr on t4
+    #move t5, t5				# zi = ci on t5
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
@@ -229,38 +235,61 @@ shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
 
-    mul t6, t4, t4		    # zr * zr on t6
-    mul t7, t5, t5		    # zi * zi on t7
+    mul.s $f4, $f2, $f2 # zi * zi 
+    mul.s $f5, $f3, $f3 # zr * zr
+    #mul t6, t4, t4		    # zr * zr on t6
+    #mul t7, t5, t5		    # zi * zi on t7
 
-    addu t8, t6, t7		    # absz = zr² + zi² on t8
-    addiu t8, t8, -4		# absz - 4 on t8 
-    bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
+    add.s $f6, $f4, $f5 # absz =  zr**2 + zi**2
+    #addu t8, t6, t7		    # absz = zr**2 + zi**2 on t8
+    li.s $f7, -4
+    add.s $f6, $f6, $f7		# absz - 4 on t8 
+    #addiu t8, t8, -4		# absz - 4 on t8 
+    li.s $f8, 0
+    c.lt.s $f8, $f6
+    # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack
-    sw t4, ZR_OFFSET($fp)
-    sw t5, ZI_OFFSET($fp)
+    s.s $f3, ZR_OFFSET($fp)
+    #sw t4, ZR_OFFSET($fp)
+    s.s $f2, ZI_OFFSET($fp)
+    #sw t5, ZI_OFFSET($fp)
     ####
     
     # sr = zr*zr - zi*zi + cpr
-    subu t4, t6, t7		    # zr² - zi² on t4
-    lw t5, CPR_OFFSET($fp)
-    addu t4, t4, t5         # (zr² - zi²) + cpr
-    sw t4, SR_OFFSET($fp)	# save sr in stack
+    sub.s $f2, $f5, $f4		    # zr**2 - zi**2 on t4
+    #subu t4, t6, t7		    # zr**2 - zi**2 on t4
+    l.s $f3, CPR_OFFSET($fp) 
+    #lw t5, CPR_OFFSET($fp)
+    add.s $f2, $f2, $f3         # (zr**2 - zi**2) + cpr
+    #addu t4, t4, t5         # (zr**2 - zi**2) + cpr
+    s.s $f2, SR_OFFSET($fp)	# save sr in stack
+    #sw t4, SR_OFFSET($fp)	# save sr in stack
     
     #### Restore zr zi
-    lw t5, ZI_OFFSET($fp)
-    lw t6, ZR_OFFSET($fp)
+    l.s $f3, ZR_OFFSET($fp)
+    #lw t6, ZR_OFFSET($fp)
+    l.s $f2, ZI_OFFSET($fp)
+    #lw t5, ZI_OFFSET($fp)
     ####
     
     # si = 2 * zr * zi + cpi
-    mul t7, t5, t6		    # (zr * zi)
-    sll t7, t7, 1		    # 2 * (zr * zi) 
-    lw t4, CPI_OFFSET($fp)
-    addu t7, t7, t4         # (2*zr*zi) + cpi
-    sw t7, SI_OFFSET($fp)	# save si in stack
+    mul.s $f4, $f2, $f3		    # (zr * zi)
+    #mul t7, t5, t6		    # (zr * zi)
+    li.s $f5, 2
+    mul.s $f4, $f4, $f5
+    #sll t7, t7, 1		    # 2 * (zr * zi) 
+    l.s $f5, CPI_OFFSET($fp)
+    #lw t4, CPI_OFFSET($fp)
+    add.s $f4, $f4, $f5         # (2*zr*zi) + cpi
+    #addu t7, t7, t4         # (2*zr*zi) + cpi
+    s.s $f4, SI_OFFSET($fp)	# save si in stack
+    #sw t7, SI_OFFSET($fp)	# save si in stack
 
-    lw t4, SR_OFFSET($fp)	# zr = sr
-    lw t5, SI_OFFSET($fp)	# zi = si
+    l.s $f5, SR_OFFSET($fp)	# zr = sr
+    #lw t4, SR_OFFSET($fp)	# zr = sr
+    l.s $f6, SI_OFFSET($fp)	# zi = si
+    #lw t5, SI_OFFSET($fp)	# zi = si
 
     addi t9, t9, 1          # ++c
     sw t9, C_OFFSET($fp)	# save c in stack

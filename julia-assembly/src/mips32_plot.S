@@ -337,22 +337,28 @@ store_shade:
 
     #### Restore state
     lw t4, Y_OFFSET($fp)
-    lw t5, CI_OFFSET($fp)
+    l.s $f2, CI_OFFSET($fp)
+    #lw t5, CI_OFFSET($fp)
     lw t7, X_OFFSET($fp)
-    lw t8, CR_OFFSET($fp)
+    l.s $f3, CR_OFFSET($fp)
+    #lw t8, CR_OFFSET($fp)
     lw t0, A0_OFFSET($fp)	# parms on t0
     ####
 
 UL_re_icr:
     addi t7, t7, 1 		    # ++x
-    lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
-    addu t8, t8, t6		    # cr += parms->d_re
+    l.s $f4, PARAM_D_RE(t0)	# parms->d_re on t6
+    #lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
+    add.s $f3, $f3, $f4		    # cr += parms->d_re
+    #addu t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
     addi t4, t4, 1 		    # ++y
-    lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
-    subu t5, t5, t6		    # ci -= parms->d_im
+    l.s $f4, PARAM_D_IM(t0)	# parms->d_im on t6
+    #lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
+    sub.s $f2, $f2, $f4		    # ci -= parms->d_im
+    #subu t5, t5, t6		    # ci -= parms->d_im
     j UL_im_loop
 
 flush_end:

@@ -99,9 +99,9 @@ title_loop:
 
 x_res:
     lw t2, PARAM_X_RES(a0)	# load parms->x_res on t2
-    move t7, t2               # t7 = t2
+    move t7, t2             # t7 = t2
     li t3, 10
-    li t4, -1                # t4 = x_res_len
+    li t4, -1               # t4 = x_res_len
 x_res_len:
     div t7, t3              # x_res /= 10
     addi t4, t4, 1          # x_res_len++
@@ -127,16 +127,16 @@ loop_x:
 
 y_res:
     lw t2, PARAM_Y_RES(a0)
-    move t7, t2               # t7 = t2
+    move t7, t2             # t7 = t2
     li t3, 10
-    li t4, -1                # t4 = x_res_len
+    li t4, -1               # t4 = y_res_len
 y_res_len:
-    div t7, t3              # x_res /= 10
-    addi t4, t4, 1          # x_res_len++
+    div t7, t3              # y_res /= 10
+    addi t4, t4, 1          # y_res_len++
     bne t7, zero, y_res_len # if not zero, loop
     add t1, t1, t4          # start at the end
 loop_y:
-    div  t2, t3             # x_res /= 10
+    div  t2, t3             # y_res /= 10
     mflo t2
     mfhi t5                 # get remainder
     addi t5, t5, ASCII_0    # convert to ASCII digit
@@ -155,23 +155,23 @@ loop_y:
 
 shades:
     lw t2, PARAM_SHADES(a0)
-    move t7, t2               # t7 = t2
+    move t7, t2             # t7 = t2
     li t3, 10
-    li t4, -1                # t4 = x_res_len
+    li t4, -1               # t4 = shds_len
 shds_len:
-    div t7, t3              # x_res /= 10
-    addi t4, t4, 1          # x_res_len++
-    bne t7, zero, shds_len # if not zero, loop
+    div t7, t3              # shds /= 10
+    addi t4, t4, 1          # shds_len++
+    bne t7, zero, shds_len  # if not zero, loop
     add t1, t1, t4          # start at the end
 loop_shds:
-    div  t2, t3             # x_res /= 10
+    div  t2, t3             # shds /= 10
     mflo t2
     mfhi t5                 # get remainder
     addi t5, t5, ASCII_0    # convert to ASCII digit
     addu t6, t0, t1         # t6 = buff_addr + buff_len 
     sb   t5, 0(t6)          # store it
     sub t1, t1, 1           # adjust buf ptr 
-    bne  t2, zero, loop_shds   # if not zero, loop
+    bne t2, zero, loop_shds # if not zero, loop
     add t1, t1, t4          # correct buf ptr so it points the x_res end
     addi t1, t1, 2          # two more so \n doesnt overwrite last char
 

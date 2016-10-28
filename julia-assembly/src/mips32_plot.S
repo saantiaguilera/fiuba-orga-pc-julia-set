@@ -252,7 +252,7 @@ shades_loop:
     #addiu t8, t8, -4		# absz - 4 on t8 
     li.s $f8, 0
     c.lt.s $f8, $f6
-    bc1t update_buffer
+    bc1f update_buffer
     # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack

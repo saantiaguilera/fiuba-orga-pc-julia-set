@@ -55,10 +55,14 @@ mips32_plot:
     
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) 
     
-    lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t0
-    sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
-    lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
-    sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
+    l.s $f0, PARAM_CP_RE(a0) 
+    s.s $f0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    #lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t0
+    #sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    l.s $f0, PARAM_CP_IM(a0) 
+    s.s $f0, CPI_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    #lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
+    #sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
     li t0, 0				# t0 = 0
     sw t0, C_OFFSET($fp)	# store c = 0 on mem($fp + C_OFFSET) 
     sw t0, X_OFFSET($fp)	# store x = 0 on mem($fp + X_OFFSET)

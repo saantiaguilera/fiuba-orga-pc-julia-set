@@ -71,10 +71,15 @@ mips32_plot:
     sw t0, SR_OFFSET($fp)	# store sr = 0
     sw t0, ZI_OFFSET($fp)	# store zi = 0
     sw t0, ZR_OFFSET($fp)	# store zr = 0
-    lw t0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
-    sw t0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
-    lw t0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
-    sw t0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    # This change its not really necessary, so it can be reverted
+    l.s $f0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
+    #lw t0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
+    s.s $f0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    #sw t0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    l.s $f0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
+    #lw t0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
+    s.s $f0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    #sw t0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     
     li t0, 0
     sw t0, BUFF_LEN_OFFSET($fp)	# store buff_len = 0
@@ -247,6 +252,7 @@ shades_loop:
     #addiu t8, t8, -4		# absz - 4 on t8 
     li.s $f8, 0
     c.lt.s $f8, $f6
+    bc1t update_buffer
     # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack

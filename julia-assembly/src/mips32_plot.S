@@ -327,14 +327,28 @@ write_buffer:
 	
 store_shade:
     addiu t1, $fp, BUFF_OFFSET	# buff_addr on t1
-    lw t2, BUFF_LEN_OFFSET($fp) 	# buff_len on t2
-    lw t3, C_OFFSET($fp)			# recover c from stack
-    
-    addu t4, t1, t2
-    addiu t3, t3, ASCII_0		# ascii conversion
-    sb t3, 0(t4)				# buff_addr[buff_len] = c
-    addiu t2, t2, 1				# buff_len ++
-    
+    lw t2, BUFF_LEN_OFFSET($fp) # buff_len on t2
+    lw t3, C_OFFSET($fp)		# recover c from stack
+    move t4, t3
+    li t5, 10
+    li t6, -1                   # t6 = shade_len
+shade_len:
+    div t4, t5                  # shade /= 10
+    addi t6, t6, 1              # shade_len++
+    bnez t4, shade_len          # if shade != 0, loop
+    add t2, t2, t6              # start at the end
+loop_shade:
+    div t3, t5                  # shade /= 10
+    mflo t3
+    mfhi t7                     # get remainder
+    addi t7, t7, ASCII_0		# ascii conversion
+    addu t8, t1, t2             # t8 = buff_addr (t1) + buff_len (t2) 
+    sb t7, 0(t8)                # store it
+    sub t2, t2, 1               # adjust buf ptr
+    bnez t3, loop_shade         # if c != 0, loop 
+    add t2, t2, t6              # correct buf ptr so it point at shade end
+    addi t2, t2, 2              # two more so \n doesnt overwrite last char
+   
     la t3, line_break
     lb t3, 0(t3)
     addu t4, t1, t2

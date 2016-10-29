@@ -294,9 +294,9 @@ shades_loop:
     s.s $f4, SI_OFFSET($fp)	# save si in stack
     #sw t7, SI_OFFSET($fp)	# save si in stack
 
-    l.s $f5, SR_OFFSET($fp)	# zr = sr
+    l.s $f3, SR_OFFSET($fp)	# zr = sr
     #lw t4, SR_OFFSET($fp)	# zr = sr
-    l.s $f6, SI_OFFSET($fp)	# zi = si
+    l.s $f2, SI_OFFSET($fp)	# zi = si
     #lw t5, SI_OFFSET($fp)	# zi = si
 
     #addi t9, t9, 1          # ++c

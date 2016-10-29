@@ -258,9 +258,9 @@ shades_loop:
     # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack
-    s.s $f3, ZR_OFFSET($fp)
+    #s.s $f3, ZR_OFFSET($fp)
     #sw t4, ZR_OFFSET($fp)
-    s.s $f2, ZI_OFFSET($fp)
+    #s.s $f2, ZI_OFFSET($fp)
     #sw t5, ZI_OFFSET($fp)
     ####
     
@@ -298,6 +298,13 @@ shades_loop:
     #lw t4, SR_OFFSET($fp)	# zr = sr
     l.s $f2, SI_OFFSET($fp)	# zi = si
     #lw t5, SI_OFFSET($fp)	# zi = si
+    #### Save zr zi in stack
+    s.s $f3, ZR_OFFSET($fp)
+    #sw t4, ZR_OFFSET($fp)
+    s.s $f2, ZI_OFFSET($fp)
+    #sw t5, ZI_OFFSET($fp)
+    ####
+    
 
     #addi t9, t9, 1          # ++c
     #sw t9, C_OFFSET($fp)	# save c in stack
@@ -359,10 +366,10 @@ loop_shade:
 
     #### Restore state
     lw t4, Y_OFFSET($fp)
-    l.s $f2, CI_OFFSET($fp)
+    l.s $f0, CI_OFFSET($fp)
     #lw t5, CI_OFFSET($fp)
     lw t7, X_OFFSET($fp)
-    l.s $f3, CR_OFFSET($fp)
+    l.s $f1, CR_OFFSET($fp)
     #lw t8, CR_OFFSET($fp)
     lw t0, A0_OFFSET($fp)	# parms on t0
     ####
@@ -371,7 +378,7 @@ UL_re_icr:
     addi t7, t7, 1 		    # ++x
     l.s $f4, PARAM_D_RE(t0)	# parms->d_re on t6
     #lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
-    add.s $f3, $f3, $f4		    # cr += parms->d_re
+    add.s $f1, $f1, $f4		    # cr += parms->d_re
     #addu t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
@@ -379,7 +386,7 @@ UL_im_icr:
     addi t4, t4, 1 		    # ++y
     l.s $f4, PARAM_D_IM(t0)	# parms->d_im on t6
     #lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
-    sub.s $f2, $f2, $f4		    # ci -= parms->d_im
+    sub.s $f0, $f0, $f4		    # ci -= parms->d_im
     #subu t5, t5, t6		    # ci -= parms->d_im
     j UL_im_loop
 

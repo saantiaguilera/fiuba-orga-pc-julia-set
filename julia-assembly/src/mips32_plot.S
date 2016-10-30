@@ -258,9 +258,9 @@ shades_loop:
     # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack
-    #s.s $f3, ZR_OFFSET($fp)
+    s.s $f3, ZR_OFFSET($fp)
     #sw t4, ZR_OFFSET($fp)
-    #s.s $f2, ZI_OFFSET($fp)
+    s.s $f2, ZI_OFFSET($fp)
     #sw t5, ZI_OFFSET($fp)
     ####
     
@@ -298,14 +298,7 @@ shades_loop:
     #lw t4, SR_OFFSET($fp)	# zr = sr
     l.s $f2, SI_OFFSET($fp)	# zi = si
     #lw t5, SI_OFFSET($fp)	# zi = si
-    #### Save zr zi in stack
-    s.s $f3, ZR_OFFSET($fp)
-    #sw t4, ZR_OFFSET($fp)
-    s.s $f2, ZI_OFFSET($fp)
-    #sw t5, ZI_OFFSET($fp)
-    ####
     
-
     #addi t9, t9, 1          # ++c
     #sw t9, C_OFFSET($fp)	# save c in stack
     j shades_loop

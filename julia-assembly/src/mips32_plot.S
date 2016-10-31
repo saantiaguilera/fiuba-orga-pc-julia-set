@@ -317,7 +317,7 @@ write_buffer:
 	lw t0, A0_OFFSET($fp)		# parms on t0
 	lw a0, PARAM_FD(t0)			# file descriptor 
 	addiu a1, $fp, BUFF_OFFSET	# address of buffer from which to write
-	li a2, BUF_SZ				# buffer length
+	lw a2, BUFF_LEN_OFFSET($fp)	# buffer length
 	syscall						# write to file
 	bltz v0, io_error			# if v0 < 0, io error
 

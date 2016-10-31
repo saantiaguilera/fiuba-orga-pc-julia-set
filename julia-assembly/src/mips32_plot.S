@@ -309,8 +309,8 @@ update_buffer:
     # Hay lugar para 2 bytes en el buffer?
     li t4, BUF_SZ
     subu t4, t4, t1				# BUF_SZ - buff_len
-    li t5, 2
-    bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 2) KB!! store
+    li t5, 4
+    bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 4) KB!! store
     
 write_buffer:  
 	li v0, SYS_write			# system call for write to file

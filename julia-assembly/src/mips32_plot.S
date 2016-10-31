@@ -239,8 +239,6 @@ UL_re_loop:
 shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
-    addi t9, t9, 1          # ++c
-    sw t9, C_OFFSET($fp)	# save c in stack
 
     mul.s $f4, $f2, $f2 # zi * zi 
     mul.s $f5, $f3, $f3 # zr * zr
@@ -254,7 +252,7 @@ shades_loop:
     #addiu t8, t8, -4		# absz - 4 on t8 
     li.s $f8, 0
     c.lt.s $f8, $f6
-    bc1f update_buffer
+    bc1t update_buffer
     # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack
@@ -298,9 +296,9 @@ shades_loop:
     #lw t4, SR_OFFSET($fp)	# zr = sr
     l.s $f2, SI_OFFSET($fp)	# zi = si
     #lw t5, SI_OFFSET($fp)	# zi = si
-    
-    #addi t9, t9, 1          # ++c
-    #sw t9, C_OFFSET($fp)	# save c in stack
+
+    addi t9, t9, 1          # ++c
+    sw t9, C_OFFSET($fp)	# save c in stack
     j shades_loop
 
     ###############################################################

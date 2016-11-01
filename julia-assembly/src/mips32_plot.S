@@ -55,10 +55,14 @@ mips32_plot:
     
     sw a0, A0_OFFSET($fp)	# store params on mem($fp + A0_OFFSET) 
     
-    lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t0
-    sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
-    lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
-    sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
+    l.s $f0, PARAM_CP_RE(a0) 
+    s.s $f0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    #lw t0, PARAM_CP_RE(a0)	# cpr = params->cp_re on t0
+    #sw t0, CPR_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    l.s $f0, PARAM_CP_IM(a0) 
+    s.s $f0, CPI_OFFSET($fp)	# store cpr on mem($fp + CPR_OFFSET)
+    #lw t0, PARAM_CP_IM(a0)	# cpi = params->cp_im on t2
+    #sw t0, CPI_OFFSET($fp)	# store cpi on mem($fp + CPI_OFFSET)
     li t0, 0				# t0 = 0
     sw t0, C_OFFSET($fp)	# store c = 0 on mem($fp + C_OFFSET) 
     sw t0, X_OFFSET($fp)	# store x = 0 on mem($fp + X_OFFSET)
@@ -67,10 +71,15 @@ mips32_plot:
     sw t0, SR_OFFSET($fp)	# store sr = 0
     sw t0, ZI_OFFSET($fp)	# store zi = 0
     sw t0, ZR_OFFSET($fp)	# store zr = 0
-    lw t0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
-    sw t0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
-    lw t0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
-    sw t0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    # This change its not really necessary, so it can be reverted
+    l.s $f0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
+    #lw t0, PARAM_UL_IM(a0)	# ci = parms->UL_im on t0
+    s.s $f0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    #sw t0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    l.s $f0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
+    #lw t0, PARAM_UL_RE(a0)	# cr = parms->UL_re on t0
+    s.s $f0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    #sw t0, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     
     li t0, 0
     sw t0, BUFF_LEN_OFFSET($fp)	# store buff_len = 0
@@ -194,26 +203,32 @@ loop_shds:
     lw t0, A0_OFFSET($fp)	# parms on t0
 
     lw t4, Y_OFFSET($fp)	# y on t4
-    lw t5, CI_OFFSET($fp)	# ci on t5
+    l.s $f0, CI_OFFSET($fp) # ci on f0
+    #lw t5, CI_OFFSET($fp)	# ci on t5
 UL_im_loop:
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
     bge t4, t6, flush_end	# if (y < parms->y_res) continue
 
     li t7, 0				# x = 0 on t7
-    lw t8, CR_OFFSET($fp)	# cr on t8
+    l.s $f1, CR_OFFSET($fp)	# cr on f1 
+    #lw t8, CR_OFFSET($fp)	# cr on t8
 UL_re_loop:
     lw t6, PARAM_X_RES(t0)	# parms->x_res on t6
     bge t7, t6, UL_im_icr	# if (x < parms->x_res) continue
 
     #### Save state in stack
     sw t4, Y_OFFSET($fp)	# store y on mem($fp + Y_OFFSET)
-    sw t5, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    s.s $f0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
+    #sw t5, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
     sw t7, X_OFFSET($fp)	# store x on mem($fp + X_OFFSET)
-    sw t8, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    s.s $f1, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
+    #sw t8, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     ####
 
-    move t4, t8				# zr = cr on t4
-    move t5, t5				# zi = ci on t5
+    mov.s $f2, $f0 # zi = ci 
+    mov.s $f3, $f1 # zr = cr
+    #move t4, t8				# zr = cr on t4
+    #move t5, t5				# zi = ci on t5
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
@@ -225,38 +240,62 @@ shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
 
-    mul t6, t4, t4		    # zr * zr on t6
-    mul t7, t5, t5		    # zi * zi on t7
+    mul.s $f4, $f2, $f2 # zi * zi 
+    mul.s $f5, $f3, $f3 # zr * zr
+    #mul t6, t4, t4		    # zr * zr on t6
+    #mul t7, t5, t5		    # zi * zi on t7
 
-    addu t8, t6, t7		    # absz = zr² + zi² on t8
-    addiu t8, t8, -4		# absz - 4 on t8 
-    bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
+    add.s $f6, $f4, $f5 # absz =  zr**2 + zi**2
+    #addu t8, t6, t7		    # absz = zr**2 + zi**2 on t8
+    li.s $f7, -4
+    add.s $f6, $f6, $f7		# absz - 4 on t8 
+    #addiu t8, t8, -4		# absz - 4 on t8 
+    li.s $f8, 0
+    c.lt.s $f8, $f6
+    bc1t update_buffer
+    # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
     
     #### Save zr zi in stack
-    sw t4, ZR_OFFSET($fp)
-    sw t5, ZI_OFFSET($fp)
+    s.s $f3, ZR_OFFSET($fp)
+    #sw t4, ZR_OFFSET($fp)
+    s.s $f2, ZI_OFFSET($fp)
+    #sw t5, ZI_OFFSET($fp)
     ####
     
     # sr = zr*zr - zi*zi + cpr
-    subu t4, t6, t7		    # zr² - zi² on t4
-    lw t5, CPR_OFFSET($fp)
-    addu t4, t4, t5         # (zr² - zi²) + cpr
-    sw t4, SR_OFFSET($fp)	# save sr in stack
+    sub.s $f2, $f5, $f4		    # zr**2 - zi**2 on t4
+    #subu t4, t6, t7		    # zr**2 - zi**2 on t4
+    l.s $f3, CPR_OFFSET($fp) 
+    #lw t5, CPR_OFFSET($fp)
+    add.s $f2, $f2, $f3         # (zr**2 - zi**2) + cpr
+    #addu t4, t4, t5         # (zr**2 - zi**2) + cpr
+    s.s $f2, SR_OFFSET($fp)	# save sr in stack
+    #sw t4, SR_OFFSET($fp)	# save sr in stack
     
     #### Restore zr zi
-    lw t5, ZI_OFFSET($fp)
-    lw t6, ZR_OFFSET($fp)
+    l.s $f3, ZR_OFFSET($fp)
+    #lw t6, ZR_OFFSET($fp)
+    l.s $f2, ZI_OFFSET($fp)
+    #lw t5, ZI_OFFSET($fp)
     ####
     
     # si = 2 * zr * zi + cpi
-    mul t7, t5, t6		    # (zr * zi)
-    sll t7, t7, 1		    # 2 * (zr * zi) 
-    lw t4, CPI_OFFSET($fp)
-    addu t7, t7, t4         # (2*zr*zi) + cpi
-    sw t7, SI_OFFSET($fp)	# save si in stack
+    mul.s $f4, $f2, $f3		    # (zr * zi)
+    #mul t7, t5, t6		    # (zr * zi)
+    li.s $f5, 2
+    mul.s $f4, $f4, $f5
+    #sll t7, t7, 1		    # 2 * (zr * zi) 
+    l.s $f5, CPI_OFFSET($fp)
+    #lw t4, CPI_OFFSET($fp)
+    add.s $f4, $f4, $f5         # (2*zr*zi) + cpi
+    #addu t7, t7, t4         # (2*zr*zi) + cpi
+    s.s $f4, SI_OFFSET($fp)	# save si in stack
+    #sw t7, SI_OFFSET($fp)	# save si in stack
 
-    lw t4, SR_OFFSET($fp)	# zr = sr
-    lw t5, SI_OFFSET($fp)	# zi = si
+    l.s $f3, SR_OFFSET($fp)	# zr = sr
+    #lw t4, SR_OFFSET($fp)	# zr = sr
+    l.s $f2, SI_OFFSET($fp)	# zi = si
+    #lw t5, SI_OFFSET($fp)	# zi = si
 
     addi t9, t9, 1          # ++c
     sw t9, C_OFFSET($fp)	# save c in stack
@@ -267,18 +306,18 @@ shades_loop:
 update_buffer:
     lw t1, BUFF_LEN_OFFSET($fp) # buff_len on t1
     
-    # Hay lugar para 5 bytes en el buffer?
+    # Hay lugar para 2 bytes en el buffer?
     li t4, BUF_SZ
     subu t4, t4, t1				# BUF_SZ - buff_len
-    li t5, 5
-    bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 5) KB!! store
+    li t5, 4
+    bge t4, t5, store_shade		# if (BUF_SZ - buff_len >= 4) KB!! store
     
 write_buffer:  
 	li v0, SYS_write			# system call for write to file
 	lw t0, A0_OFFSET($fp)		# parms on t0
 	lw a0, PARAM_FD(t0)			# file descriptor 
 	addiu a1, $fp, BUFF_OFFSET	# address of buffer from which to write
-	li a2, BUF_SZ				# buffer length
+	lw a2, BUFF_LEN_OFFSET($fp)	# buffer length
 	syscall						# write to file
 	bltz v0, io_error			# if v0 < 0, io error
 
@@ -286,14 +325,28 @@ write_buffer:
 	
 store_shade:
     addiu t1, $fp, BUFF_OFFSET	# buff_addr on t1
-    lw t2, BUFF_LEN_OFFSET($fp) 	# buff_len on t2
-    lw t3, C_OFFSET($fp)			# recover c from stack
-    
-    addu t4, t1, t2
-    addiu t3, t3, ASCII_0		# ascii conversion
-    sb t3, 0(t4)				# buff_addr[buff_len] = c
-    addiu t2, t2, 1				# buff_len ++
-    
+    lw t2, BUFF_LEN_OFFSET($fp) # buff_len on t2
+    lw t3, C_OFFSET($fp)		# recover c from stack
+    move t4, t3
+    li t5, 10
+    li t6, -1                   # t6 = shade_len
+shade_len:
+    div t4, t5                  # shade /= 10
+    addi t6, t6, 1              # shade_len++
+    bnez t4, shade_len          # if shade != 0, loop
+    add t2, t2, t6              # start at the end
+loop_shade:
+    div t3, t5                  # shade /= 10
+    mflo t3
+    mfhi t7                     # get remainder
+    addi t7, t7, ASCII_0		# ascii conversion
+    addu t8, t1, t2             # t8 = buff_addr (t1) + buff_len (t2) 
+    sb t7, 0(t8)                # store it
+    sub t2, t2, 1               # adjust buf ptr
+    bnez t3, loop_shade         # if c != 0, loop 
+    add t2, t2, t6              # correct buf ptr so it point at shade end
+    addi t2, t2, 2              # two more so \n doesnt overwrite last char
+   
     la t3, line_break
     lb t3, 0(t3)
     addu t4, t1, t2
@@ -304,22 +357,28 @@ store_shade:
 
     #### Restore state
     lw t4, Y_OFFSET($fp)
-    lw t5, CI_OFFSET($fp)
+    l.s $f0, CI_OFFSET($fp)
+    #lw t5, CI_OFFSET($fp)
     lw t7, X_OFFSET($fp)
-    lw t8, CR_OFFSET($fp)
+    l.s $f1, CR_OFFSET($fp)
+    #lw t8, CR_OFFSET($fp)
     lw t0, A0_OFFSET($fp)	# parms on t0
     ####
 
 UL_re_icr:
     addi t7, t7, 1 		    # ++x
-    lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
-    addu t8, t8, t6		    # cr += parms->d_re
+    l.s $f4, PARAM_D_RE(t0)	# parms->d_re on t6
+    #lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
+    add.s $f1, $f1, $f4		    # cr += parms->d_re
+    #addu t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
     addi t4, t4, 1 		    # ++y
-    lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
-    subu t5, t5, t6		    # ci -= parms->d_im
+    l.s $f4, PARAM_D_IM(t0)	# parms->d_im on t6
+    #lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
+    sub.s $f0, $f0, $f4		    # ci -= parms->d_im
+    #subu t5, t5, t6		    # ci -= parms->d_im
     j UL_im_loop
 
 flush_end:

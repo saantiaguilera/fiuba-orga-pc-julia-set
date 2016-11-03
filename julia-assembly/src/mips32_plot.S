@@ -232,6 +232,8 @@ UL_re_loop:
     mov.s $f3, $f1 # zr = cr
     #move t4, t8				# zr = cr on t4
     #move t5, t5				# zi = ci on t5
+    s.s $f2, ZI_OFFSET($fp)
+    s.s $f3, ZR_OFFSET($fp)
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
@@ -244,6 +246,8 @@ shades_loop:
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
 
+    l.s $f2, ZI_OFFSET($fp)
+    l.s $f3, ZR_OFFSET($fp)
     mul.s $f4, $f2, $f2 # zi * zi 
     mul.s $f5, $f3, $f3 # zr * zr
     #mul t6, t4, t4		    # zr * zr on t6
@@ -251,13 +255,11 @@ shades_loop:
 
     add.s $f6, $f4, $f5 # absz =  zr**2 + zi**2
     #addu t8, t6, t7		    # absz = zr**2 + zi**2 on t8
-    li.s $f7, -4
-    add.s $f6, $f6, $f7		# absz - 4 on t8 
     #addiu t8, t8, -4		# absz - 4 on t8 
-    li.s $f8, 0
+    li.s $f8, 4
     c.lt.s $f8, $f6
     bc1t update_buffer
-    # bgtz t8, update_buffer	# if (absz - 4 > 0) write_shade
+    # bgtz t8, update_buffer	# if (absz > 4) write_shade
     
     #### Save zr zi in stack
     s.s $f3, ZR_OFFSET($fp)
@@ -300,6 +302,9 @@ shades_loop:
     #lw t4, SR_OFFSET($fp)	# zr = sr
     l.s $f2, SI_OFFSET($fp)	# zi = si
     #lw t5, SI_OFFSET($fp)	# zi = si
+
+    s.s $f3, ZR_OFFSET($fp)
+    s.s $f2, ZI_OFFSET($fp)
 
     addi t9, t9, 1          # ++c
     sw t9, C_OFFSET($fp)	# save c in stack

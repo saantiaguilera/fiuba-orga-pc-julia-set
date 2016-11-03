@@ -206,13 +206,16 @@ loop_shds:
     l.s $f0, CI_OFFSET($fp) # ci on f0
     #lw t5, CI_OFFSET($fp)	# ci on t5
 UL_im_loop:
+    lw t0, A0_OFFSET($fp)	# parms on t0
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
+    lw t4, Y_OFFSET($fp)	# y on t4
     bge t4, t6, flush_end	# if (y < parms->y_res) continue
 
     li t7, 0				# x = 0 on t7
     l.s $f1, CR_OFFSET($fp)	# cr on f1 
     #lw t8, CR_OFFSET($fp)	# cr on t8
 UL_re_loop:
+    lw t0, A0_OFFSET($fp)	# parms on t0
     lw t6, PARAM_X_RES(t0)	# parms->x_res on t6
     bge t7, t6, UL_im_icr	# if (x < parms->x_res) continue
 
@@ -237,6 +240,7 @@ UL_re_loop:
 
     li t9, 0                # c = 0 on t9
 shades_loop:
+    lw t0, A0_OFFSET($fp)	# parms on t0
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
 
@@ -367,17 +371,23 @@ loop_shade:
 
 UL_re_icr:
     addi t7, t7, 1 		    # ++x
+    sw t7, X_OFFSET($fp)	# store x on mem($fp + X_OFFSET)
     l.s $f4, PARAM_D_RE(t0)	# parms->d_re on t6
     #lw t6, PARAM_D_RE(t0)	# parms->d_re on t6
     add.s $f1, $f1, $f4		    # cr += parms->d_re
+    s.s $f1, CR_OFFSET($fp)	# store cr on mem($fp + CR_OFFSET)
     #addu t8, t8, t6		    # cr += parms->d_re
     j UL_re_loop
 
 UL_im_icr:
+    lw t4, Y_OFFSET($fp)
     addi t4, t4, 1 		    # ++y
+    sw t4, Y_OFFSET($fp)	# store y on mem($fp + Y_OFFSET)
     l.s $f4, PARAM_D_IM(t0)	# parms->d_im on t6
     #lw t6, PARAM_D_IM(t0)	# parms->d_im on t6
+    l.s $f0, CI_OFFSET($fp)
     sub.s $f0, $f0, $f4		    # ci -= parms->d_im
+    s.s $f0, CI_OFFSET($fp)	# store ci on mem($fp + CI_OFFSET)
     #subu t5, t5, t6		    # ci -= parms->d_im
     j UL_im_loop
 

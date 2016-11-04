@@ -201,33 +201,56 @@ loop_shds:
     # El parámetro de iteración es el punto (cr, ci).
 
 
-UL_im_loop:
+
+    li t4, 0			# y = 0 on t4
+    sw t4, Y_OFFSET($fp)
+
     lw t0, A0_OFFSET($fp)	# parms on t0
+    l.s $f0, PARAM_UL_IM(t0)	# ci = parms->UL_im
+    s.s $f0, CI_OFFSET($fp)
+
+UL_im_loop:
     lw t4, Y_OFFSET($fp)	# y on t4
+
+    lw t0, A0_OFFSET($fp)	# parms on t0
     lw t6, PARAM_Y_RES(t0)	# parms->y_res on t6
+
     bge t4, t6, flush_end	# if (y < parms->y_res) continue
 
     li t7, 0			# x = 0 on t7
     sw t7, X_OFFSET($fp)	# store x on mem($fp + X_OFFSET)
+
+    l.s $f0, PARAM_UL_RE(t0)	# cr = parms->UL_re
+    s.s $f0, CR_OFFSET($fp)
+
 UL_re_loop:
-    lw t0, A0_OFFSET($fp)	# parms on t0
+    lw t7, X_OFFSET($fp)	# x on t7
+    
+    lw t0, A0_OFFSET($fp)	# parms on t0   
     lw t6, PARAM_X_RES(t0)	# parms->x_res on t6
     bge t7, t6, UL_im_icr	# if (x < parms->x_res) continue
 
+
     l.s $f0, CI_OFFSET($fp)	# ci on f0
     mov.s $f2, $f0 		# zi = ci 
+    s.s $f2, ZI_OFFSET($fp)
+
     l.s $f1, CR_OFFSET($fp)	# cr on f1 
     mov.s $f3, $f1		# zr = cr
+    s.s $f3, ZR_OFFSET($fp)
 
     ###############################################################
     # Determinamos el nivel de brillo asociado al punto
     # (cr, ci), usando la fórmula compleja recurrente 
     # f = f^3 + c.
 
-    li t9, 0                # c = 0 on t9
+    li t9, 0            	# c = 0 on t9
+    sw t9, C_OFFSET($fp)
 shades_loop:
     lw t0, A0_OFFSET($fp)	# parms on t0
     lw t6, PARAM_SHADES(t0)	# parms->shades on t6
+
+    lw t9, C_OFFSET($fp)
     beq t9, t6, update_buffer	# if (c < parms->shades) continue
 
     mul.s $f4, $f2, $f2		# zi * zi 
